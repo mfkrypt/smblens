@@ -75,7 +75,7 @@ Flags may come before or after the target.
 
 Usernames may be written as `alice`, `CORP\alice`, or `alice@corp.example.com`; an explicit domain inside the username wins over `-d`.
 
-For password and NT-hash authentication, the domain is optional. If neither `-d` nor an embedded domain is supplied, it defaults to `.` (local). Active Directory accounts normally need their NetBIOS domain: use `-d CORP` or the more portable `CORP\alice`. `alice@corp.example.com` is split into account and domain, and works when the server accepts that domain form. Local accounts can omit the domain or use `-d .`. The NT hash does not encode the domain, so pass-the-hash follows the same rule.
+For password and NT-hash authentication, the domain is optional.
 
 Kerberos credential sources, in default priority order:
 
@@ -92,7 +92,6 @@ Use `--kerberos-source password|ccache|keytab` to override the inference. Kerber
 
 `--krb5-conf` selects a configuration file; otherwise `$KRB5_CONFIG` and `/etc/krb5.conf` are consulted. When neither exists, SMBLens builds a minimal configuration from `--realm` and `--kdc`.
 
-Kerberos setup is bounded by `--connect-timeout`, so an unreachable KDC produces a fast, explanatory error instead of a hung interface.
 
 ## Reading the access column
 
