@@ -133,7 +133,7 @@ internal/ui/                Bubble Tea application
 ```
 
 
-TODO:
+## TODO:
 
 1. Test Kerberos auth with ccache tickets
 2. Re-Test permission display for specific Share read access
