@@ -136,5 +136,6 @@ internal/ui/                Bubble Tea application
 ## TODO:
 
 1. Test Kerberos auth with ccache tickets
-2. Re-Test permission display for specific Share read access
-3. Review code for better understanding
+2. Test NTLM auth
+3. Re-Test permission display for specific Share read access
+4. Review code for better understanding
