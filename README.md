@@ -2,19 +2,9 @@
 
 SMBLens is an interactive terminal SMB client for Active Directory share enumeration. It connects with a password, an NT hash (pass-the-hash), or Kerberos.
 
-```console
- SMBLens  10.0.0.5  ·  CORP\alice  ·  password
- ─────────────────────────────────────────────────────────────────
- Shares  on 10.0.0.5
- 6 shares · write probe on
- NAME                      TYPE      ACCESS      COMMENT
-  Data                      disk      RW          Department share
-  Finance                   disk      R           Finance archive
-  Backups                   disk      DENIED
-  IPC$                      admin     -           Remote IPC
+![readme](./images/readme.png)
 
- enter open · p permissions · t recursive scan · / filter · esc/c disconnect · ? help · q quit
-```
+
 
 ## Installation
 
