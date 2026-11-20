@@ -131,3 +131,10 @@ internal/ui/                Bubble Tea application
   shares.go, browser.go, tree.go, viewer.go, dialog.go, transfer.go,
   connect.go, keys.go, styles.go, format.go
 ```
+
+
+TODO:
+
+1. Test Kerberos auth with ccache tickets
+2. Re-Test permission display for specific Share read access
+3. Review code for better understanding
