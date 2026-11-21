@@ -120,6 +120,7 @@ internal/config/            command-line parsing and help
 internal/smbclient/         SMB session, auth, shares, files, recursive walk and
                             download, security-descriptor parsing, friendly errors
 internal/termtext/          terminal sanitisation for untrusted server text
+internal/version/           version reporting from Go build metadata
 internal/ui/                Bubble Tea application
   app.go                    root model, update/view routing, layout
   app_connection.go         dial, share enumeration, mounting

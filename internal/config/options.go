@@ -14,9 +14,6 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
-// Version is the SMBLens release version.
-const Version = "0.1.0"
-
 // Defaults for the tunable options.
 const (
 	DefaultDepth          = 10

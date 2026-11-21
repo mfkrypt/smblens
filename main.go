@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mfkrypt/smblens/internal/config"
 	"github.com/mfkrypt/smblens/internal/ui"
+	"github.com/mfkrypt/smblens/internal/version"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 		return
 	}
 	if opts.ShowVersion {
-		fmt.Printf("SMBLens %s\n", config.Version)
+		fmt.Printf("SMBLens %s\n", version.Get())
 		return
 	}
 
