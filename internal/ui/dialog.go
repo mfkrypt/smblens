@@ -348,8 +348,8 @@ func permissionReport(perms *smbclient.Permissions, access *smbclient.AccessStat
 		fmt.Fprintf(&b, "   mask:    0x%08X\n", ace.Mask)
 	}
 
-	b.WriteString("\nThis is the NTFS ACL. Share permissions are enforced in addition to it, ")
-	b.WriteString("so the account may have less access than this ACL suggests.")
+	b.WriteString("\nThis is the object's security descriptor. Share permissions are enforced ")
+	b.WriteString("in addition to it, so the account may have less access than this ACL suggests.")
 	b.WriteString("\nReading an ACL requires READ_CONTROL; failing to read one does not itself mean access is denied.")
 	return b.String()
 }

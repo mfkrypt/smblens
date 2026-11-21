@@ -3,6 +3,7 @@
 package ui
 
 import (
+	"fmt"
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -77,6 +78,9 @@ func (a *App) handleSharesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if !ok {
 			return a, nil
 		}
+		if share.Kind != smbclient.ShareDisk {
+			return a, a.setToast(nonDiskShareMessage(share), true)
+		}
 		return a, a.openShareCmd(share.Name, "")
 	case "p":
 		share, ok := a.shares.selected()
@@ -88,6 +92,9 @@ func (a *App) handleSharesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		share, ok := a.shares.selected()
 		if !ok || a.client == nil || a.tree.running {
 			return a, nil
+		}
+		if share.Kind != smbclient.ShareDisk {
+			return a, a.setToast(nonDiskShareMessage(share), true)
 		}
 		a.treeBack = screenShares
 		a.screen = screenTree
@@ -256,4 +263,19 @@ func (a *App) handleViewerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return a, nil
 	}
 	return a, a.viewer.update(msg)
+}
+
+// nonDiskShareMessage explains why a named-pipe or print/device share cannot
+// be browsed like a file share.
+func nonDiskShareMessage(share smbclient.ShareInfo) string {
+	switch share.Kind {
+	case smbclient.ShareIPC:
+		return fmt.Sprintf("%s is a named-pipe share; it has no browsable file tree. Press p for its permissions.", share.Name)
+	case smbclient.SharePrint:
+		return fmt.Sprintf("%s is a print queue; it has no browsable file tree. Press p for its permissions.", share.Name)
+	case smbclient.ShareDevice:
+		return fmt.Sprintf("%s is a device share; it has no browsable file tree. Press p for its permissions.", share.Name)
+	default:
+		return fmt.Sprintf("%s is not a file share; it has no browsable file tree.", share.Name)
+	}
 }

@@ -88,24 +88,28 @@ Use `--kerberos-source password|ccache|keytab` to override the inference. Kerber
 SMB has no request that returns "what can this account do with this share". Share permissions and the NTFS ACL both apply, and ACL inspection alone does not account for share permissions. SMBLens answers the practical question by trying:
 
 1. **Mount** the share.
-2. **List** the share root.
-3. Unless `--no-write-probe` is set, create `.smblens-probe-XXXXXXXXXXXX`, write the 7-byte marker `smblens` to it, and delete it.
+2. **List** the share root (disk shares only).
+3. Unless `--no-write-probe` is set, create `.smblens-probe-XXXXXXXXXXXX`, write the 7-byte marker `smblens` to it, and delete it (disk shares only).
+
+`IPC$`, print queues, and device shares have no browsable file root. Their access column reflects a successful tree connect: `R`, the same READ that tools such as NetExec/nxc report. They are not write-probed, and pressing `enter` on one explains that it has no file tree; `p` still reads its security descriptor where the server exposes it.
 
 | Label | Meaning |
 | --- | --- |
 | `RW` | Readable and writable |
-| `R` | Readable; the write probe was denied |
+| `R` | Readable; the write probe was denied, or a non-disk share connected successfully |
 | `W` | Writable, but the root listing was denied |
 | `R*` | Readable; write access was not tested (`--no-write-probe`) |
 | `DENIED` | The account cannot mount the share |
 | `ERROR` | The probe failed; press `p` or `i` for the reason |
-| `-` | Not applicable (for example `IPC$`) or no access demonstrated |
+| `-` | No access was demonstrated |
 
 The probe file is deleted immediately after the test. On servers that keep a recycle bin, the server may retain a copy there. If the probe cannot be written or deleted, the reason is shown in the share's permission view (press `p`).
 
+For `IPC$`, the root cannot be listed (`STATUS_INVALID_INFO_CLASS`), but the tree connect is real access: it is what enables `srvsvc` share enumeration and other named-pipe RPC. This is why the label is `R`, not `-`.
+
 `--no-write-probe` skips only this automatic test. Read access is still checked by listing the share root, and the access column shows `R*` instead of `R`/`RW` because write access is unknown. It does **not** turn SMBLens into a read-only client: uploads, folder creation, renames, and deletions you explicitly invoke in the interface still work. If no writes at all should reach the server, use `--no-write-probe` and simply avoid those actions.
 
-The permissions view (`p`) is separate: it shows the **NTFS security descriptor** — owner, group, and every ACE with decoded rights and inheritance. Reading it needs `READ_CONTROL` on the object; failing to read the ACL does not by itself mean the data is inaccessible.
+The permissions view (`p`) is separate: it shows the **security descriptor** — owner, group, and every ACE with decoded rights and inheritance (the NTFS ACL for file shares, the object/pipe ACL for `IPC$`). Reading it needs `READ_CONTROL` on the object; failing to read the ACL does not by itself mean the data is inaccessible.
 
 
 ## Project layout

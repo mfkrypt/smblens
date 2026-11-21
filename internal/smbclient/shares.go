@@ -92,9 +92,20 @@ func (c *Client) probeShare(ctx context.Context, info ShareInfo, probeWrite bool
 		defer func() { _ = mounted.Umount() }()
 		state.Mounted = true
 
-		// Share types other than disk trees do not expose a browsable root.
-		if info.Kind == ShareIPC || info.Kind == SharePrint || info.Kind == ShareDevice {
-			state.Note = "this share type does not support file listing"
+		// Non-disk shares have no browsable file root, but a successful tree
+		// connect is still share-level access. Tools such as NetExec report
+		// this as READ; there is no file listing or write test to perform.
+		if info.Kind != ShareDisk {
+			state.Read = true
+			state.WriteTested = true
+			switch info.Kind {
+			case ShareIPC:
+				state.Note = "named-pipe share; file listing and write probing do not apply"
+			case SharePrint:
+				state.Note = "print queue; file listing and write probing do not apply"
+			default:
+				state.Note = "device share; file listing and write probing do not apply"
+			}
 			return nil
 		}
 

@@ -331,7 +331,7 @@ func TestDialogPromptAndReport(t *testing.T) {
 	report := permissionReport(&smbclient.Permissions{
 		Path: "docs", Host: "srv", ShareName: "share", Descriptor: desc,
 	}, &access)
-	for _, want := range []string{`\\srv\share\docs`, "read + write", "BUILTIN\\Administrators", "Full control", "Deny", "NTFS ACL"} {
+	for _, want := range []string{`\\srv\share\docs`, "read + write", "BUILTIN\\Administrators", "Full control", "Deny", "security descriptor"} {
 		if !strings.Contains(report, want) {
 			t.Fatalf("permission report does not contain %q:\n%s", want, report)
 		}
@@ -604,6 +604,35 @@ func TestTreeDownloadView(t *testing.T) {
 	}
 	if err := state.failureError(); err == nil || !strings.Contains(err.Error(), "docs/b.txt") {
 		t.Fatalf("failureError = %v", err)
+	}
+}
+
+func TestNonDiskShareCannotBeOpened(t *testing.T) {
+	a := testApp()
+	a.client = &smbclient.Client{} // the guard runs before any client use
+	a.screen = screenShares
+	a.shares.setData([]smbclient.ShareInfo{{
+		Name:    "IPC$",
+		Kind:    smbclient.ShareIPC,
+		Special: true,
+		Access:  smbclient.AccessState{Mounted: true, Read: true, WriteTested: true},
+	}}, nil)
+
+	a.Update(keyRunes("enter"))
+	if a.browser.share != nil || a.screen != screenShares {
+		t.Fatal("a named-pipe share must not open the file browser")
+	}
+	if !strings.Contains(strings.ToLower(a.toast), "named-pipe") {
+		t.Fatalf("toast = %q, want a named-pipe explanation", a.toast)
+	}
+	if !strings.Contains(a.shares.visible[0].Access.Label(), "R") {
+		t.Fatalf("IPC$ access label = %q", a.shares.visible[0].Access.Label())
+	}
+
+	a.toast = ""
+	a.Update(keyRunes("t"))
+	if a.screen != screenShares || !strings.Contains(strings.ToLower(a.toast), "named-pipe") {
+		t.Fatalf("recursive scan should be refused; screen=%v toast=%q", a.screen, a.toast)
 	}
 }
 
