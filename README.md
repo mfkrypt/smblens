@@ -20,7 +20,7 @@ SMBLens normally opens a login form. If you supply everything it needs on the co
 # Password
 smblens 10.0.0.5 -u alice -d CORP -p 'S3cret!'
 
-# NT hash (pass-the-hash); LM:NT input is accepted too
+# NT hash (pass-the-hash), LM:NT input is accepted too
 smblens 10.0.0.5 -u alice -d CORP -H 0123456789abcdef0123456789abcdef
 
 # Kerberos from a credential cache (defaults to $KRB5CCNAME)
