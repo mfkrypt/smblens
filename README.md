@@ -105,8 +105,6 @@ SMB has no request that returns "what can this account do with this share". Shar
 
 The probe file is deleted immediately after the test. On servers that keep a recycle bin, the server may retain a copy there. If the probe cannot be written or deleted, the reason is shown in the share's permission view (press `p`).
 
-For `IPC$`, the root cannot be listed (`STATUS_INVALID_INFO_CLASS`), but the tree connect is real access: it is what enables `srvsvc` share enumeration and other named-pipe RPC. This is why the label is `R`, not `-`.
-
 `--no-write-probe` skips only this automatic test. Read access is still checked by listing the share root, and the access column shows `R*` instead of `R`/`RW` because write access is unknown. It does **not** turn SMBLens into a read-only client: uploads, folder creation, renames, and deletions you explicitly invoke in the interface still work. If no writes at all should reach the server, use `--no-write-probe` and simply avoid those actions.
 
 The permissions view (`p`) is separate: it shows the **security descriptor** — owner, group, and every ACE with decoded rights and inheritance (the NTFS ACL for file shares, the object/pipe ACL for `IPC$`). Reading it needs `READ_CONTROL` on the object; failing to read the ACL does not by itself mean the data is inaccessible.
