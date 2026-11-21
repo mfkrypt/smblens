@@ -1,6 +1,6 @@
 # SMBLens
 
-SMBLens is an interactive terminal SMB client for Active Directory share enumeration. It connects with a password, an NT hash (pass-the-hash), or Kerberos.
+SMBLens is an interactive terminal SMB client for Active Directory share enumeration to identify excessive share permissions and exposed resources. It works with a password, an NT hash (pass-the-hash), or Kerberos auth.
 
 ![readme](./assets/readme.png)
 
