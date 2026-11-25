@@ -161,6 +161,7 @@ func ParseSecurityDescriptor(data []byte) (*SecurityDescriptor, error) {
 	return sd, nil
 }
 
+// parseACL decodes the ACEs of a DACL located at offset in data, rejecting truncated or inconsistent entries.
 func parseACL(data []byte, offset int) ([]ACE, error) {
 	if offset < 0 || offset+8 > len(data) {
 		return nil, errors.New("ACL header is outside the security descriptor")
@@ -219,6 +220,7 @@ func parseACL(data []byte, offset int) ([]ACE, error) {
 	return aces, nil
 }
 
+// parseSIDAt decodes a binary SID at offset and attaches a well-known name when one is available.
 func parseSIDAt(data []byte, offset int) (SID, error) {
 	if offset < 0 || offset+8 > len(data) {
 		return SID{}, errors.New("SID header is outside the buffer")
@@ -249,6 +251,7 @@ func parseSIDAt(data []byte, offset int) (SID, error) {
 	return SID{Raw: raw, Name: sidName(raw)}, nil
 }
 
+// isObjectACEType reports whether an ACE type includes object GUIDs before the trustee SID.
 func isObjectACEType(t byte) bool {
 	switch t {
 	case 0x05, 0x06, 0x07, 0x08, 0x0B, 0x0C, 0x0F, 0x10:
@@ -257,6 +260,7 @@ func isObjectACEType(t byte) bool {
 	return false
 }
 
+// isAllowACEType reports whether an ACE type grants access.
 func isAllowACEType(t byte) bool {
 	switch t {
 	case 0x00, 0x05, 0x09, 0x0B:
@@ -265,6 +269,7 @@ func isAllowACEType(t byte) bool {
 	return false
 }
 
+// isDenyACEType reports whether an ACE type denies access.
 func isDenyACEType(t byte) bool {
 	switch t {
 	case 0x01, 0x06, 0x0A, 0x0C:
@@ -273,6 +278,7 @@ func isDenyACEType(t byte) bool {
 	return false
 }
 
+// aceTypeName returns a readable name for an ACE type byte.
 func aceTypeName(t byte) string {
 	switch t {
 	case 0x00:
@@ -312,6 +318,7 @@ func aceTypeName(t byte) string {
 	}
 }
 
+// aceFlagsList expands an ACE's inheritance and audit flag bits into their short names.
 func aceFlagsList(flags byte) []string {
 	var out []string
 	for _, f := range []struct {

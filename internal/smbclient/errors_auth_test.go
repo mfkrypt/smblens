@@ -11,6 +11,7 @@ import (
 	"github.com/cloudsoda/go-smb2"
 )
 
+// TestParseNTHash covers all accepted NT hash forms and rejects malformed values.
 func TestParseNTHash(t *testing.T) {
 	valid := []string{
 		"0123456789abcdef0123456789abcdef",
@@ -41,6 +42,7 @@ func TestParseNTHash(t *testing.T) {
 	}
 }
 
+// TestSplitIdentity checks DOMAIN\user, UPN, explicit-domain and local-account defaults.
 func TestSplitIdentity(t *testing.T) {
 	cases := []struct {
 		user, domain      string
@@ -62,6 +64,7 @@ func TestSplitIdentity(t *testing.T) {
 	}
 }
 
+// TestDescribeCapitalisesWithoutBreakingUnicode verifies first-rune capitalisation of wrapped errors.
 func TestDescribeCapitalisesWithoutBreakingUnicode(t *testing.T) {
 	got := Describe(errors.New("échec inattendu"))
 	if !strings.HasPrefix(got, "Échec") {
@@ -69,6 +72,7 @@ func TestDescribeCapitalisesWithoutBreakingUnicode(t *testing.T) {
 	}
 }
 
+// TestIsAuthError distinguishes authentication failures from access-denied and network errors.
 func TestIsAuthError(t *testing.T) {
 	if !IsAuthError(&smb2.ResponseError{Code: statusAccountLockedOut}) {
 		t.Fatal("a locked account should count as an auth error")
@@ -84,6 +88,7 @@ func TestIsAuthError(t *testing.T) {
 	}
 }
 
+// TestDescribeAuthenticationFailure checks the summary, hint and NTSTATUS detail for a logon failure.
 func TestDescribeAuthenticationFailure(t *testing.T) {
 	err := &smb2.ResponseError{Code: statusLogonFailure}
 	got := Describe(err)
@@ -98,6 +103,7 @@ func TestDescribeAuthenticationFailure(t *testing.T) {
 	}
 }
 
+// TestDescribeAccessDeniedThroughWrapping checks that wrapped path errors are unwrapped for access-denied handling.
 func TestDescribeAccessDeniedThroughWrapping(t *testing.T) {
 	inner := &os.PathError{Op: "open", Path: "secret.txt", Err: &smb2.ResponseError{Code: statusAccessDenied}}
 	err := errors.New("outer")
@@ -113,6 +119,7 @@ func TestDescribeAccessDeniedThroughWrapping(t *testing.T) {
 	}
 }
 
+// wrapErr wraps inner in a custom error whose Unwrap exposes it, for testing error chains.
 func wrapErr(outer, inner error) error {
 	return &wrapped{outer: outer, inner: inner}
 }
@@ -121,9 +128,13 @@ type wrapped struct {
 	outer, inner error
 }
 
+// Error returns the combined outer and inner message.
 func (w *wrapped) Error() string { return w.outer.Error() + ": " + w.inner.Error() }
+
+// Unwrap exposes the inner error so errors.Is and errors.As can traverse the chain.
 func (w *wrapped) Unwrap() error { return w.inner }
 
+// TestDescribeKerberosErrors checks clock-skew advice for KRB_AP_ERR_SKEW.
 func TestDescribeKerberosErrors(t *testing.T) {
 	err := errors.New("Kerberos login failed: KRB_AP_ERR_SKEW")
 	got := Describe(err)
@@ -135,6 +146,7 @@ func TestDescribeKerberosErrors(t *testing.T) {
 	}
 }
 
+// TestDescribeContextAndNetworkErrors checks timeout, missing-path and bad-share descriptions.
 func TestDescribeContextAndNetworkErrors(t *testing.T) {
 	if got := Describe(context.DeadlineExceeded); !strings.Contains(got, "Timed out") {
 		t.Fatalf("Describe(deadline) = %q", got)
@@ -147,6 +159,7 @@ func TestDescribeContextAndNetworkErrors(t *testing.T) {
 	}
 }
 
+// TestIsConnectionLost checks the transport and NTSTATUS errors classified as a lost session.
 func TestIsConnectionLost(t *testing.T) {
 	cases := []error{
 		ErrConnectionLost,
@@ -165,6 +178,7 @@ func TestIsConnectionLost(t *testing.T) {
 	}
 }
 
+// TestIsNotFound checks the NTSTATUS values classified as a missing object or share.
 func TestIsNotFound(t *testing.T) {
 	if !IsNotFound(&smb2.ResponseError{Code: statusObjectNameNotFound}) {
 		t.Fatal("STATUS_OBJECT_NAME_NOT_FOUND not recognised")
@@ -177,6 +191,7 @@ func TestIsNotFound(t *testing.T) {
 	}
 }
 
+// TestStatusOfUnwrapsPathErrors verifies that statusOf finds an NTSTATUS inside an os.PathError.
 func TestStatusOfUnwrapsPathErrors(t *testing.T) {
 	err := &os.PathError{Op: "open", Path: "x", Err: &smb2.ResponseError{Code: statusAccountLockedOut}}
 	code, ok := statusOf(err)

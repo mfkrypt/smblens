@@ -30,6 +30,7 @@ type viewerModel struct {
 	theme         *theme
 }
 
+// newViewerModel builds an empty scrollable file viewer.
 func newViewerModel(t *theme) viewerModel {
 	return viewerModel{
 		viewport: viewport.New(80, 20),
@@ -37,6 +38,7 @@ func newViewerModel(t *theme) viewerModel {
 	}
 }
 
+// open resets the viewer and records the file being loaded.
 func (m *viewerModel) open(host, shareName, path string) {
 	m.host = host
 	m.shareName = shareName
@@ -52,6 +54,7 @@ func (m *viewerModel) open(host, shareName, path string) {
 	m.viewport.SetXOffset(0)
 }
 
+// setContent installs file data, handling binary files, truncation, errors and sanitisation.
 func (m *viewerModel) setContent(content smbclient.FileContent, err error) {
 	m.loading = false
 	m.err = err
@@ -88,6 +91,7 @@ func (m *viewerModel) wrapContent() {
 	m.viewport.SetContent(wrapped)
 }
 
+// setSize resizes the viewport and reflows the loaded text.
 func (m *viewerModel) setSize(width, height int) {
 	m.width, m.height = width, height
 	m.viewport.Width = width - 2
@@ -102,12 +106,14 @@ func (m *viewerModel) setSize(width, height int) {
 	m.wrapContent()
 }
 
+// update forwards scrolling keys to the viewport.
 func (m *viewerModel) update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	m.viewport, cmd = m.viewport.Update(msg)
 	return cmd
 }
 
+// reset clears the viewer when it is closed.
 func (m *viewerModel) reset() {
 	m.path = ""
 	m.raw = ""
@@ -116,6 +122,7 @@ func (m *viewerModel) reset() {
 	m.viewport.SetContent("")
 }
 
+// View renders the file title, location, status messages and scrollable content.
 func (m *viewerModel) View() string {
 	t := m.theme
 	title := t.appTitle.Render("View") + t.muted.Render("  "+termtext.Clean(m.path))

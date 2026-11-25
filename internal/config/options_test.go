@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestParseTargetForms covers every accepted target spelling, including UNC, smb://, IPv6 and a target port.
 func TestParseTargetForms(t *testing.T) {
 	cases := []struct {
 		in          string
@@ -39,6 +40,7 @@ func TestParseTargetForms(t *testing.T) {
 	}
 }
 
+// TestParseFlagsMayFollowTarget checks that flags are reordered so they may appear after the positional target.
 func TestParseFlagsMayFollowTarget(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "")
 	t.Setenv("SMBLENS_NTHASH", "")
@@ -64,6 +66,7 @@ func TestParseFlagsMayFollowTarget(t *testing.T) {
 	}
 }
 
+// TestParseInfersAuth verifies that an NT hash or a Kerberos cache selects the authentication method automatically.
 func TestParseInfersAuth(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "")
 	t.Setenv("SMBLENS_NTHASH", "")
@@ -88,6 +91,7 @@ func TestParseInfersAuth(t *testing.T) {
 	}
 }
 
+// TestParseKerberosSource checks --kerberos-source parsing and rejection of unknown sources.
 func TestParseKerberosSource(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "")
 	t.Setenv("KRB5CCNAME", "")
@@ -105,6 +109,7 @@ func TestParseKerberosSource(t *testing.T) {
 	}
 }
 
+// TestParsePasswordFromEnvironment verifies the SMBLENS_PASSWORD fallback when --password is absent.
 func TestParsePasswordFromEnvironment(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "from-env")
 	t.Setenv("SMBLENS_NTHASH", "")
@@ -118,6 +123,7 @@ func TestParsePasswordFromEnvironment(t *testing.T) {
 	}
 }
 
+// TestParseTargetPortWins checks that a port in the target overrides --port.
 func TestParseTargetPortWins(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "")
 	opts, err := Parse([]string{"--port", "4450", "host:1445"})
@@ -129,6 +135,7 @@ func TestParseTargetPortWins(t *testing.T) {
 	}
 }
 
+// TestParseRejections checks that invalid flags, credentials and positional arguments are rejected.
 func TestParseRejections(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "")
 	cases := [][]string{
@@ -146,6 +153,7 @@ func TestParseRejections(t *testing.T) {
 	}
 }
 
+// TestParseHelpAndVersion verifies that --help and --version set their respective mode flags.
 func TestParseHelpAndVersion(t *testing.T) {
 	opts, err := Parse([]string{"--help"})
 	if err != nil {
@@ -164,6 +172,7 @@ func TestParseHelpAndVersion(t *testing.T) {
 	}
 }
 
+// TestParseRecursiveAndDepth checks recursive mode, an unlimited depth value and share extraction.
 func TestParseRecursiveAndDepth(t *testing.T) {
 	t.Setenv("SMBLENS_PASSWORD", "")
 	opts, err := Parse([]string{"--recursive", "--depth", "0", "host/share"})
@@ -178,6 +187,7 @@ func TestParseRecursiveAndDepth(t *testing.T) {
 	}
 }
 
+// TestFlagsWithValuesCoversEveryValueFlag guards the argument-reordering list against newly added value-taking flags.
 func TestFlagsWithValuesCoversEveryValueFlag(t *testing.T) {
 	// Guard against adding a value-taking flag and forgetting the list used by
 	// the argument reordering.
@@ -193,6 +203,7 @@ func TestFlagsWithValuesCoversEveryValueFlag(t *testing.T) {
 	}
 }
 
+// TestUsageMentionsAuthAndProbe checks that help text documents authentication, probing and recursive options.
 func TestUsageMentionsAuthAndProbe(t *testing.T) {
 	usage := Usage()
 	for _, want := range []string{"kerberos", "hash", "no-write-probe", "recursive", "SMBLENS_PASSWORD"} {

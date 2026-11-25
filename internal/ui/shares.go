@@ -39,6 +39,7 @@ type sharesModel struct {
 	theme         *theme
 }
 
+// newSharesModel builds the share table, filter input and empty enumeration state.
 func newSharesModel(t *theme) sharesModel {
 	tbl := table.New(
 		table.WithColumns(shareColumns(80)),
@@ -57,6 +58,7 @@ func newSharesModel(t *theme) sharesModel {
 	return sharesModel{table: tbl, filter: filter, theme: t}
 }
 
+// shareColumns lays out the name, type, access and comment columns for the given width.
 func shareColumns(width int) []table.Column {
 	if width < 50 {
 		width = 50
@@ -77,6 +79,7 @@ func shareColumns(width int) []table.Column {
 	}
 }
 
+// setSize resizes the table, columns and filter for the available body area.
 func (m *sharesModel) setSize(width, height int) {
 	m.width, m.height = width, height
 	m.table.SetWidth(width)
@@ -96,16 +99,19 @@ func (m *sharesModel) setSize(width, height int) {
 	m.table.SetHeight(tableHeight)
 }
 
+// setContext records the server and whether write probing was enabled for the status line.
 func (m *sharesModel) setContext(host string, probeWrites bool) {
 	m.host = host
 	m.probeWrites = probeWrites
 }
 
+// setLoading clears the previous error and marks the enumeration as in progress.
 func (m *sharesModel) setLoading() {
 	m.loading = true
 	m.err = nil
 }
 
+// setData installs a share enumeration, clears the loading state and rebuilds the visible rows.
 func (m *sharesModel) setData(entries []smbclient.ShareInfo, err error) {
 	m.loading = false
 	m.err = err
@@ -167,6 +173,7 @@ func (m *sharesModel) rebuild() {
 	}
 }
 
+// accessRank assigns shares a sort position based on their effective access.
 func accessRank(state smbclient.AccessState) int {
 	switch {
 	case state.Denied:
@@ -184,6 +191,7 @@ func accessRank(state smbclient.AccessState) int {
 	}
 }
 
+// selected returns the share under the table cursor and whether one exists.
 func (m *sharesModel) selected() (smbclient.ShareInfo, bool) {
 	cursor := m.table.Cursor()
 	if cursor < 0 || cursor >= len(m.visible) {
@@ -192,6 +200,7 @@ func (m *sharesModel) selected() (smbclient.ShareInfo, bool) {
 	return m.visible[cursor], true
 }
 
+// startFilter focuses the filter input and clears any previous filter.
 func (m *sharesModel) startFilter() tea.Cmd {
 	m.filtering = true
 	m.filter.SetValue("")
@@ -201,6 +210,7 @@ func (m *sharesModel) startFilter() tea.Cmd {
 	return m.filter.Focus()
 }
 
+// stopFilter leaves filter mode, optionally clearing the filter text.
 func (m *sharesModel) stopFilter(clear bool) {
 	m.filtering = false
 	m.filter.Blur()
@@ -229,6 +239,7 @@ func (m *sharesModel) handleFilterKey(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
+// cycleSort switches between name order and access order.
 func (m *sharesModel) cycleSort() {
 	if m.sortMode == shareSortName {
 		m.sortMode = shareSortAccess
@@ -245,6 +256,7 @@ func (m *sharesModel) updateTable(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
+// View renders the share title, probe status, errors and table.
 func (m *sharesModel) View() string {
 	t := m.theme
 	title := t.appTitle.Render("Shares") + t.muted.Render("  on "+termtext.Clean(m.host))

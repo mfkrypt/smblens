@@ -15,6 +15,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
+// testOptions builds minimal valid options for constructing an App in tests.
 func testOptions() *config.Options {
 	return &config.Options{
 		Config: smbclient.Config{
@@ -27,16 +28,19 @@ func testOptions() *config.Options {
 	}
 }
 
+// testApp creates an App with colour disabled and a fixed 100x32 layout.
 func testApp() *App {
 	a := New(testOptions())
 	a.layout(100, 32)
 	return a
 }
 
+// keyRunes builds a key message from printable characters.
 func keyRunes(s string) tea.KeyMsg {
 	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)}
 }
 
+// TestViewsAtManySizes ensures every screen and an error dialog render non-empty output at many terminal sizes.
 func TestViewsAtManySizes(t *testing.T) {
 	a := testApp()
 	a.shares.setContext("fileserver", true)
@@ -66,6 +70,7 @@ func TestViewsAtManySizes(t *testing.T) {
 	}
 }
 
+// TestConnectFormBuildsPasswordConfig checks target, credential and share parsing from the login form.
 func TestConnectFormBuildsPasswordConfig(t *testing.T) {
 	a := testApp()
 	a.connect.server.SetValue("fileserver:1445/share/docs")
@@ -91,6 +96,7 @@ func TestConnectFormBuildsPasswordConfig(t *testing.T) {
 	}
 }
 
+// TestConnectFormHashValidation checks that malformed NT hashes are rejected and valid ones select hash auth.
 func TestConnectFormHashValidation(t *testing.T) {
 	a := testApp()
 	a.connect.server.SetValue("fileserver")
@@ -113,6 +119,7 @@ func TestConnectFormHashValidation(t *testing.T) {
 	}
 }
 
+// TestConnectFormAllowsBlankDomainForPasswordAndHash checks optional domain handling and embedded DOMAIN\user identities.
 func TestConnectFormAllowsBlankDomainForPasswordAndHash(t *testing.T) {
 	a := testApp()
 	a.connect.server.SetValue("fileserver")
@@ -149,6 +156,7 @@ func TestConnectFormAllowsBlankDomainForPasswordAndHash(t *testing.T) {
 	}
 }
 
+// TestConnectFormKerberosValidation checks realm requirements and password/ccache Kerberos configurations.
 func TestConnectFormKerberosValidation(t *testing.T) {
 	a := testApp()
 	a.connect.server.SetValue("fileserver.example.com")
@@ -186,6 +194,7 @@ func TestConnectFormKerberosValidation(t *testing.T) {
 	}
 }
 
+// TestConnectFormKeyHandling checks text entry, tab focus movement and authentication cycling.
 func TestConnectFormKeyHandling(t *testing.T) {
 	a := testApp()
 	form := a.connect
@@ -211,6 +220,7 @@ func TestConnectFormKeyHandling(t *testing.T) {
 	}
 }
 
+// TestSharesFilterSortAndSelection checks share filtering, access sorting and cursor selection.
 func TestSharesFilterSortAndSelection(t *testing.T) {
 	m := newSharesModel(newTheme())
 	m.setSize(120, 30)
@@ -250,6 +260,7 @@ func TestSharesFilterSortAndSelection(t *testing.T) {
 	}
 }
 
+// TestBrowserFilterSortAndHidden checks directory-first ordering, hidden entries and filtering.
 func TestBrowserFilterSortAndHidden(t *testing.T) {
 	m := newBrowserModel(newTheme())
 	m.setSize(120, 30)
@@ -278,6 +289,7 @@ func TestBrowserFilterSortAndHidden(t *testing.T) {
 	}
 }
 
+// TestTreeAppendAndErrorDetail checks streamed scan rows, selected error details and completion statistics.
 func TestTreeAppendAndErrorDetail(t *testing.T) {
 	m := newTreeModel(newTheme())
 	m.setSize(120, 30)
@@ -307,6 +319,7 @@ func TestTreeAppendAndErrorDetail(t *testing.T) {
 	}
 }
 
+// TestDialogPromptAndReport checks prompt values and the content of a permission report.
 func TestDialogPromptAndReport(t *testing.T) {
 	tm := newTheme()
 	d := newDialog(tm)
@@ -338,6 +351,7 @@ func TestDialogPromptAndReport(t *testing.T) {
 	}
 }
 
+// TestAppHelpDialog checks that ? opens the help dialog and esc closes it.
 func TestAppHelpDialog(t *testing.T) {
 	a := testApp()
 	a.screen = screenShares
@@ -354,6 +368,7 @@ func TestAppHelpDialog(t *testing.T) {
 	}
 }
 
+// TestAppFilterFlow checks starting, applying and cancelling a share filter through the App.
 func TestAppFilterFlow(t *testing.T) {
 	a := testApp()
 	a.screen = screenShares
@@ -376,6 +391,7 @@ func TestAppFilterFlow(t *testing.T) {
 	}
 }
 
+// TestAppExportShares checks that e writes a valid 0600 share report.
 func TestAppExportShares(t *testing.T) {
 	t.Chdir(t.TempDir())
 	a := testApp()
@@ -413,6 +429,7 @@ func TestAppExportShares(t *testing.T) {
 	}
 }
 
+// TestTreeReportExport checks that scan results, including errors, are written as valid JSON.
 func TestTreeReportExport(t *testing.T) {
 	t.Chdir(t.TempDir())
 	items := []smbclient.WalkItem{
@@ -437,6 +454,7 @@ func TestTreeReportExport(t *testing.T) {
 	}
 }
 
+// TestServerStringsAreSanitisedInViews checks that escape sequences in server data never reach rendered views.
 func TestServerStringsAreSanitisedInViews(t *testing.T) {
 	a := testApp()
 	osc := "\x1b]0;pwned\x07"
@@ -482,6 +500,7 @@ func TestServerStringsAreSanitisedInViews(t *testing.T) {
 	}
 }
 
+// TestAccessDetailExplainsProbeState checks the explanations for untested writes, probe notes and share-type notes.
 func TestAccessDetailExplainsProbeState(t *testing.T) {
 	state := smbclient.AccessState{Mounted: true, Read: true}
 	if got := accessDetail(state); !strings.Contains(got, "write not tested") {
@@ -502,6 +521,7 @@ func TestAccessDetailExplainsProbeState(t *testing.T) {
 	}
 }
 
+// TestDownloadsDefaultToCwd checks that file and folder downloads default to the current working directory.
 func TestDownloadsDefaultToCwd(t *testing.T) {
 	dir := t.TempDir()
 	t.Chdir(dir)
@@ -538,6 +558,7 @@ func TestDownloadsDefaultToCwd(t *testing.T) {
 	}
 }
 
+// TestFolderDownloadMergesIntoExistingDirectory checks merge confirmation and rejection of a file destination.
 func TestFolderDownloadMergesIntoExistingDirectory(t *testing.T) {
 	dir := t.TempDir()
 	a := testApp()
@@ -570,6 +591,7 @@ func TestFolderDownloadMergesIntoExistingDirectory(t *testing.T) {
 	}
 }
 
+// TestTreeDownloadView checks the progress and partial-failure presentation of a folder download.
 func TestTreeDownloadView(t *testing.T) {
 	state := &transferState{
 		direction:  transferDownloadTree,
@@ -607,6 +629,7 @@ func TestTreeDownloadView(t *testing.T) {
 	}
 }
 
+// TestNonDiskShareCannotBeOpened checks that IPC$ cannot enter the browser or start a recursive scan.
 func TestNonDiskShareCannotBeOpened(t *testing.T) {
 	a := testApp()
 	a.client = &smbclient.Client{} // the guard runs before any client use
@@ -636,6 +659,7 @@ func TestNonDiskShareCannotBeOpened(t *testing.T) {
 	}
 }
 
+// TestReparseEntryIsNotFollowed checks that reparse points cannot open a download dialog.
 func TestReparseEntryIsNotFollowed(t *testing.T) {
 	a := testApp()
 	a.screen = screenBrowser
@@ -652,6 +676,7 @@ func TestReparseEntryIsNotFollowed(t *testing.T) {
 	}
 }
 
+// TestPromptValidation checks empty and separator-containing names and a valid folder name.
 func TestPromptValidation(t *testing.T) {
 	a := testApp()
 	a.screen = screenBrowser
@@ -679,6 +704,7 @@ func TestPromptValidation(t *testing.T) {
 	}
 }
 
+// TestTransferView checks the single-file transfer progress and failure views.
 func TestTransferView(t *testing.T) {
 	tm := newTheme()
 	state := &transferState{
@@ -706,6 +732,7 @@ func TestTransferView(t *testing.T) {
 	}
 }
 
+// TestSmallHelpers checks size formatting, filename sanitisation and text wrapping.
 func TestSmallHelpers(t *testing.T) {
 	if got := formatSize(1536); got != "1.5 KB" {
 		t.Fatalf("formatSize(1536) = %q", got)
@@ -722,6 +749,7 @@ func TestSmallHelpers(t *testing.T) {
 	}
 }
 
+// TestConnectHelpAdvertisesCtrlCQuit checks that the login form advertises ctrl+c, not q, as quit.
 func TestConnectHelpAdvertisesCtrlCQuit(t *testing.T) {
 	keys := defaultKeys()
 	for _, binding := range (connectKeys{keys}).ShortHelp() {
@@ -747,6 +775,7 @@ func TestConnectHelpAdvertisesCtrlCQuit(t *testing.T) {
 	}
 }
 
+// TestKeyMapsAreComplete checks that every key map supplies help text and key lists.
 func TestKeyMapsAreComplete(t *testing.T) {
 	keys := defaultKeys()
 	maps := map[string]help.KeyMap{

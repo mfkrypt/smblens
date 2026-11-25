@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// validRemoteName rejects empty names, reserved dot names, path separators and NUL bytes before an SMB operation.
 func validRemoteName(name string) error {
 	switch {
 	case strings.TrimSpace(name) == "":
@@ -23,6 +24,7 @@ func validRemoteName(name string) error {
 	return nil
 }
 
+// expandPath trims a path and expands a leading ~ or ~/ using the current user's home directory.
 func expandPath(p string) string {
 	p = strings.TrimSpace(p)
 	if p == "~" {
@@ -38,6 +40,7 @@ func expandPath(p string) string {
 	return p
 }
 
+// resolveDownloadPath appends the remote name when the destination is an existing directory or ends in a separator.
 func resolveDownloadPath(local, name string) string {
 	if local == "" {
 		return local
@@ -51,6 +54,7 @@ func resolveDownloadPath(local, name string) string {
 	return local
 }
 
+// browserUNC formats the current host, share and path as a UNC path for prompts and reports.
 func (a *App) browserUNC(path string) string {
 	base := `\\` + a.cfg.Host + `\` + a.browser.shareName
 	if path != "" {

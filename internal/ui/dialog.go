@@ -66,6 +66,7 @@ type dialogModel struct {
 	theme         *theme
 }
 
+// newDialog builds the modal model and its prompt and viewport widgets.
 func newDialog(t *theme) dialogModel {
 	prompt := newTextInput("")
 	prompt.Prompt = "› "
@@ -76,8 +77,10 @@ func newDialog(t *theme) dialogModel {
 	}
 }
 
+// active reports whether a modal is currently displayed.
 func (d *dialogModel) active() bool { return d.kind != dialogNone }
 
+// close dismisses the modal and clears its transient state.
 func (d *dialogModel) close() {
 	d.kind = dialogNone
 	d.title = ""
@@ -89,10 +92,12 @@ func (d *dialogModel) close() {
 	d.prompt.Blur()
 }
 
+// setSize records the terminal size used to lay out the dialog.
 func (d *dialogModel) setSize(width, height int) {
 	d.width, d.height = width, height
 }
 
+// openHelp displays scrollable help text.
 func (d *dialogModel) openHelp(title, body string) {
 	d.kind = dialogHelp
 	d.title = title
@@ -103,6 +108,7 @@ func (d *dialogModel) openHelp(title, body string) {
 	d.viewport.SetYOffset(0)
 }
 
+// openConfirm displays a yes/no confirmation and stores the action to run on confirmation.
 func (d *dialogModel) openConfirm(title, body string, pending pendingAction) {
 	d.kind = dialogConfirm
 	d.title = termtext.Clean(title)
@@ -112,6 +118,7 @@ func (d *dialogModel) openConfirm(title, body string, pending pendingAction) {
 	d.loading = false
 }
 
+// openPrompt displays a text prompt and focuses its input.
 func (d *dialogModel) openPrompt(title, body, initial, placeholder string, pending pendingAction) tea.Cmd {
 	d.kind = dialogPrompt
 	d.title = termtext.Clean(title)
@@ -125,6 +132,7 @@ func (d *dialogModel) openPrompt(title, body, initial, placeholder string, pendi
 	return d.prompt.Focus()
 }
 
+// openError displays technical error details and remediation hints.
 func (d *dialogModel) openError(title string, err error) {
 	d.kind = dialogError
 	d.title = termtext.Clean(title)
@@ -141,6 +149,7 @@ func (d *dialogModel) openError(title string, err error) {
 	d.viewport.SetYOffset(0)
 }
 
+// openPermissionsLoading shows a permissions dialog while the descriptor is fetched.
 func (d *dialogModel) openPermissionsLoading(title string) {
 	d.kind = dialogPermissions
 	d.title = termtext.Clean(title)
@@ -151,6 +160,7 @@ func (d *dialogModel) openPermissionsLoading(title string) {
 	d.viewport.SetYOffset(0)
 }
 
+// openTransfer displays a transfer's progress dialog.
 func (d *dialogModel) openTransfer(state *transferState) {
 	d.kind = dialogTransfer
 	d.title = state.title()
@@ -159,6 +169,7 @@ func (d *dialogModel) openTransfer(state *transferState) {
 	d.loading = false
 }
 
+// setBody replaces the dialog body with wrapped, sanitised text.
 func (d *dialogModel) setBody(body string) {
 	d.loading = false
 	d.body = wrapText(termtext.CleanMultiline(body), d.textWidth())
@@ -166,6 +177,7 @@ func (d *dialogModel) setBody(body string) {
 	d.viewport.SetYOffset(0)
 }
 
+// textWidth returns the usable text width inside the dialog border.
 func (d *dialogModel) textWidth() int {
 	width := d.boxWidth() - 6
 	if width < 20 {
@@ -174,6 +186,7 @@ func (d *dialogModel) textWidth() int {
 	return width
 }
 
+// boxWidth computes a dialog width appropriate to its kind and the terminal.
 func (d *dialogModel) boxWidth() int {
 	width := d.width
 	if width == 0 {
@@ -202,6 +215,7 @@ func (d *dialogModel) boxWidth() int {
 	return w
 }
 
+// viewportHeight computes a bounded height for scrollable dialog content.
 func (d *dialogModel) viewportHeight() int {
 	height := d.height - 10
 	if height > 22 {
@@ -354,6 +368,7 @@ func permissionReport(perms *smbclient.Permissions, access *smbclient.AccessStat
 	return b.String()
 }
 
+// objectSuffix marks an ACE whose rights apply to a specific object.
 func objectSuffix(ace smbclient.ACE) string {
 	if ace.Object {
 		return " (object-specific)"

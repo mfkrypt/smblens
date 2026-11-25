@@ -333,6 +333,7 @@ func (s *Share) displayPath(p string) string {
 	return uncPath(s.Host(), s.Name()) + `\` + strings.ReplaceAll(p, "/", `\`)
 }
 
+// entryFromInfo converts an SMB file stat into the UI's Entry model, including dotfile, hidden-attribute and reparse information.
 func entryFromInfo(name, entryPath string, info os.FileInfo) Entry {
 	mode := info.Mode()
 	hidden := strings.HasPrefix(name, ".")
@@ -406,6 +407,7 @@ type progressReader struct {
 	tracker *progressTracker
 }
 
+// Read forwards a read to the underlying reader, accounts for the bytes transferred, and aborts when the context is cancelled.
 func (r *progressReader) Read(p []byte) (int, error) {
 	if err := r.ctx.Err(); err != nil {
 		return 0, err
@@ -426,6 +428,7 @@ type progressTracker struct {
 	started time.Time
 }
 
+// newProgressTracker creates a throttled progress reporter and emits an initial zero-progress event.
 func newProgressTracker(total int64, report ProgressFunc) *progressTracker {
 	t := &progressTracker{total: total, report: report, started: time.Now()}
 	if report != nil {
@@ -434,6 +437,7 @@ func newProgressTracker(total int64, report ProgressFunc) *progressTracker {
 	return t
 }
 
+// add accounts for bytes read and reports progress at a throttled interval.
 func (t *progressTracker) add(n int64) {
 	t.done += n
 	if t.report == nil {
@@ -445,6 +449,7 @@ func (t *progressTracker) add(n int64) {
 	}
 }
 
+// finish emits the final progress totals, even when the last throttled update was suppressed.
 func (t *progressTracker) finish() {
 	if t.report != nil {
 		t.report(t.done, t.total)
@@ -468,6 +473,7 @@ func LocalDownloadPath(baseDir, shareName, remotePath string) string {
 	return filepath.Join(parts...)
 }
 
+// sanitizeLocalComponent reduces one remote path component to a safe local filename, replacing separators and invisible or control characters.
 func sanitizeLocalComponent(s string) string {
 	s = path.Base(strings.ReplaceAll(s, `\`, "/"))
 	s = strings.ReplaceAll(s, string(os.PathSeparator), "_")

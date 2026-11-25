@@ -45,6 +45,7 @@ type TreeDownloadResult struct {
 	Errors     []string
 }
 
+// addProblem records a failed path in the result, bounding the retained error list.
 func (r *TreeDownloadResult) addProblem(path string, err error) {
 	r.Failed++
 	if len(r.Errors) >= maxTreeDownloadErrors {
@@ -57,6 +58,7 @@ func (r *TreeDownloadResult) addProblem(path string, err error) {
 	r.Errors = append(r.Errors, path+": "+Describe(err))
 }
 
+// addSkipped records a symlink or reparse point that was deliberately not downloaded.
 func (r *TreeDownloadResult) addSkipped(path, kind string) {
 	r.Skipped++
 	if len(r.Errors) < maxTreeDownloadErrors {

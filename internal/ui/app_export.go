@@ -127,14 +127,17 @@ func writeTreeReport(path, host, share, root string, items []smbclient.WalkItem)
 	return nil
 }
 
+// exportTimestamp formats the current local time for inclusion in export filenames.
 func exportTimestamp() string {
 	return time.Now().Format("20060102-150405")
 }
 
+// shareExportName builds the filename for a share enumeration export.
 func shareExportName(host string) string {
 	return fmt.Sprintf("smblens-shares-%s-%s.json", safeFilename(host), exportTimestamp())
 }
 
+// treeExportName builds the filename for a recursive scan export.
 func treeExportName(host, share string) string {
 	return fmt.Sprintf("smblens-tree-%s-%s-%s.json", safeFilename(host), safeFilename(share), exportTimestamp())
 }

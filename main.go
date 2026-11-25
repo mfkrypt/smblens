@@ -12,6 +12,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/version"
 )
 
+// main parses the command line, handles --help and --version, requires an interactive terminal for the TUI, and runs it until it exits.
 func main() {
 	opts, err := config.Parse(os.Args[1:])
 	if err != nil {
@@ -42,6 +43,7 @@ func main() {
 	app.Close()
 }
 
+// isTerminal reports whether f is attached to a character device such as a terminal.
 func isTerminal(f *os.File) bool {
 	info, err := f.Stat()
 	if err != nil {

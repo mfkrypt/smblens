@@ -280,6 +280,7 @@ func Hint(err error) string {
 	return ""
 }
 
+// ntStatusName returns the symbolic NTSTATUS name used in technical error details.
 func ntStatusName(code uint32) string {
 	switch code {
 	case statusAccessDenied:
@@ -350,6 +351,7 @@ var kerberosErrorHints = []struct {
 	{"response did not contain a valid KDC", "The KDC response could not be validated. Check the realm and KDC address."},
 }
 
+// isKerberosError reports whether err came from the Kerberos or SPNEGO layers.
 func isKerberosError(err error) bool {
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "kerberos") || strings.Contains(msg, "krb_") ||
@@ -357,6 +359,7 @@ func isKerberosError(err error) bool {
 		strings.Contains(msg, "gokrb5")
 }
 
+// describeKerberos turns a Kerberos error into a short sentence, preferring a known remediation hint.
 func describeKerberos(err error) string {
 	msg := err.Error()
 	if hint := kerberosHint(err); hint != "" {
@@ -368,6 +371,7 @@ func describeKerberos(err error) string {
 	return "Kerberos authentication failed: " + msg
 }
 
+// kerberosHint matches a Kerberos error message against known failure modes and returns the matching advice.
 func kerberosHint(err error) string {
 	msg := err.Error()
 	for _, h := range kerberosErrorHints {

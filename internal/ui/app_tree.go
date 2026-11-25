@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// onTreeEvent merges a streamed scan batch and requests the next batch until the scan finishes.
 func (a *App) onTreeEvent(msg treeEventMsg) (tea.Model, tea.Cmd) {
 	if a.screen != screenTree {
 		return a, nil
@@ -25,6 +26,7 @@ func (a *App) onTreeEvent(msg treeEventMsg) (tea.Model, tea.Cmd) {
 	return a, waitForTreeEvent(a.tree.ch)
 }
 
+// exportTree writes the collected scan results to a JSON file and reports the result.
 func (a *App) exportTree() (tea.Model, tea.Cmd) {
 	if len(a.tree.items) == 0 {
 		return a, a.setToast("There is nothing to export yet.", true)

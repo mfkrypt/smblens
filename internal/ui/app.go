@@ -28,6 +28,7 @@ const (
 	screenViewer
 )
 
+// String returns the screen name shown in help titles and window messages.
 func (s screenID) String() string {
 	switch s {
 	case screenConnect:
@@ -286,6 +287,7 @@ func (a *App) View() string {
 // ---------------------------------------------------------------------------
 // Layout
 
+// layout stores the terminal size, derives the body height and resizes every screen model.
 func (a *App) layout(width, height int) {
 	if width < 40 {
 		width = 40
@@ -308,6 +310,7 @@ func (a *App) layout(width, height int) {
 	a.help.Width = width - 2
 }
 
+// headerView renders the title bar with the connected host and authentication method.
 func (a *App) headerView() string {
 	left := a.theme.appTitle.Render("SMBLens")
 	right := "SMB client for share enumeration"
@@ -321,6 +324,7 @@ func (a *App) headerView() string {
 	return a.theme.header.Width(a.width - 2).Render(line)
 }
 
+// footerView renders the short key hints for the active screen or dialog.
 func (a *App) footerView() string {
 	h := a.help
 	h.Width = a.width - 2
@@ -328,6 +332,7 @@ func (a *App) footerView() string {
 	return a.theme.footer.Width(a.width - 2).Render(line)
 }
 
+// statusView renders the busy indicator, a transient toast, or an empty status line.
 func (a *App) statusView() string {
 	if text := a.busyText(); text != "" {
 		return a.theme.status.Render(a.spin.View() + " " + a.theme.muted.Render(text))
@@ -342,6 +347,7 @@ func (a *App) statusView() string {
 	return a.theme.status.Render("")
 }
 
+// bodyView renders the active dialog or screen and pads it to the body height.
 func (a *App) bodyView() string {
 	var body string
 	if a.dialog.active() {
@@ -364,6 +370,7 @@ func (a *App) bodyView() string {
 	return padToHeight(body, a.bodyHeight)
 }
 
+// padToHeight appends newlines so s occupies at least height lines.
 func padToHeight(s string, height int) string {
 	current := lipgloss.Height(s)
 	if current >= height {
@@ -372,6 +379,7 @@ func padToHeight(s string, height int) string {
 	return s + strings.Repeat("\n", height-current)
 }
 
+// busyText describes whichever asynchronous operation currently blocks the interface.
 func (a *App) busyText() string {
 	switch {
 	case a.connect.connecting:
@@ -394,6 +402,7 @@ func (a *App) busyText() string {
 	return ""
 }
 
+// authLabel returns a short human name for the configured authentication method.
 func authLabel(cfg smbclient.Config) string {
 	switch cfg.Auth {
 	case smbclient.AuthHash:
@@ -432,6 +441,7 @@ func authLabel(cfg smbclient.Config) string {
 // ---------------------------------------------------------------------------
 // Small helpers
 
+// setToast displays a sanitised status message and schedules its expiry after six seconds.
 func (a *App) setToast(text string, isErr bool) tea.Cmd {
 	a.toast = termtext.Clean(text)
 	a.toastErr = isErr
@@ -442,6 +452,7 @@ func (a *App) setToast(text string, isErr bool) tea.Cmd {
 	})
 }
 
+// fatal handles a lost SMB session by tearing it down, returning to the login screen and reporting the error.
 func (a *App) fatal(err error) bool {
 	if err == nil || !smbclient.IsConnectionLost(err) {
 		return false
@@ -457,6 +468,7 @@ func (a *App) fatal(err error) bool {
 	return true
 }
 
+// forward passes non-application messages to the focused text input or scrollable dialog viewport.
 func (a *App) forward(msg tea.Msg) tea.Cmd {
 	var cmds []tea.Cmd
 	if a.dialog.active() {

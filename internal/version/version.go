@@ -92,6 +92,7 @@ func (i Info) String() string {
 	return version + " (" + strings.Join(meta, ", ") + ")"
 }
 
+// formatDate renders an RFC3339 build timestamp as YYYY-MM-DD; values that do not parse are returned unchanged.
 func formatDate(value string) string {
 	if t, err := time.Parse(time.RFC3339, value); err == nil {
 		return t.UTC().Format("2006-01-02")

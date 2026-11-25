@@ -22,6 +22,7 @@ const (
 	authChoiceKerberos
 )
 
+// method converts the form's auth selector into the SMB authentication method.
 func (a authChoice) method() smbclient.AuthMethod {
 	switch a {
 	case authChoiceHash:
@@ -33,6 +34,7 @@ func (a authChoice) method() smbclient.AuthMethod {
 	}
 }
 
+// authChoiceFor selects the form auth choice matching an existing configuration.
 func authChoiceFor(method smbclient.AuthMethod) authChoice {
 	switch method {
 	case smbclient.AuthHash:
@@ -44,6 +46,7 @@ func authChoiceFor(method smbclient.AuthMethod) authChoice {
 	}
 }
 
+// label returns the human-readable authentication method shown on the form.
 func (a authChoice) label() string {
 	switch a {
 	case authChoiceHash:
@@ -87,6 +90,7 @@ type connectForm struct {
 	theme         *theme
 }
 
+// newConnectForm builds the login form and prefills it from command-line options.
 func newConnectForm(cfg smbclient.Config, t *theme) *connectForm {
 	f := &connectForm{
 		server: newTextInput("host[:port][/share]"),
@@ -144,6 +148,7 @@ func newConnectForm(cfg smbclient.Config, t *theme) *connectForm {
 	return f
 }
 
+// newTextInput creates a consistently styled single-line input with the given placeholder.
 func newTextInput(placeholder string) textinput.Model {
 	in := textinput.New()
 	in.Prompt = "› "
@@ -204,6 +209,7 @@ func (f *connectForm) fields() []formField {
 	return fields
 }
 
+// focusedField returns the row that currently has focus, clamping stale indices.
 func (f *connectForm) focusedField() formField {
 	fields := f.fields()
 	if f.focus < 0 {
@@ -215,6 +221,7 @@ func (f *connectForm) focusedField() formField {
 	return fields[f.focus]
 }
 
+// moveFocus shifts focus by delta rows and updates the input cursors.
 func (f *connectForm) moveFocus(delta int) tea.Cmd {
 	f.focus += delta
 	fields := f.fields()
@@ -299,6 +306,7 @@ func (f *connectForm) firstIncompleteField() int {
 	return 0
 }
 
+// setSize sizes the form's inputs for the available width.
 func (f *connectForm) setSize(width, height int) {
 	f.width, f.height = width, height
 	formWidth := width - 6
@@ -370,6 +378,7 @@ func (f *connectForm) handleKey(msg tea.KeyMsg, base smbclient.Config) tea.Cmd {
 	return nil
 }
 
+// updateFocusedInput forwards a key to the input belonging to the focused row.
 func (f *connectForm) updateFocusedInput(msg tea.KeyMsg) {
 	var in *textinput.Model
 	switch f.focusedField() {
@@ -389,6 +398,7 @@ func (f *connectForm) updateFocusedInput(msg tea.KeyMsg) {
 	}
 }
 
+// cycleAuth switches authentication method and resets the secret field to suit it.
 func (f *connectForm) cycleAuth(delta int) tea.Cmd {
 	f.auth = authChoice((int(f.auth) + delta + 3) % 3)
 	f.secret.SetValue("")
@@ -409,6 +419,7 @@ func (f *connectForm) cycleAuth(delta int) tea.Cmd {
 	return f.clampFocus()
 }
 
+// cycleSource switches the Kerberos credential source and resets the secret field.
 func (f *connectForm) cycleSource(delta int) tea.Cmd {
 	sources := []smbclient.KerberosSource{smbclient.KerbPassword, smbclient.KerbCCache, smbclient.KerbKeytab}
 	index := 0
@@ -433,6 +444,7 @@ func (f *connectForm) cycleSource(delta int) tea.Cmd {
 	return f.clampFocus()
 }
 
+// clampFocus keeps the focus index inside the current field list after the form changes shape.
 func (f *connectForm) clampFocus() tea.Cmd {
 	if f.focus >= len(f.fields()) {
 		f.focus = len(f.fields()) - 1
@@ -638,6 +650,7 @@ func (f *connectForm) modeHint() string {
 	return ""
 }
 
+// renderFormRow renders one labelled form row with a focus marker.
 func renderFormRow(t *theme, focused bool, label, value string) string {
 	style := t.label
 	marker := "  "

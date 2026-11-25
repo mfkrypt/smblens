@@ -66,6 +66,7 @@ type treeModel struct {
 	cancel context.CancelFunc
 }
 
+// newTreeModel builds the scan results table, filter input and empty state.
 func newTreeModel(t *theme) treeModel {
 	tbl := table.New(
 		table.WithColumns(treeColumns(80)),
@@ -84,6 +85,7 @@ func newTreeModel(t *theme) treeModel {
 	return treeModel{table: tbl, filter: filter, theme: t}
 }
 
+// treeColumns lays out the path, size, modification and type columns for the given width.
 func treeColumns(width int) []table.Column {
 	if width < 56 {
 		width = 56
@@ -104,6 +106,7 @@ func treeColumns(width int) []table.Column {
 	}
 }
 
+// setSize resizes the table, columns and filter for the available body area.
 func (m *treeModel) setSize(width, height int) {
 	m.width, m.height = width, height
 	m.table.SetWidth(width)
@@ -219,6 +222,7 @@ func runTreeScan(ctx context.Context, cancel context.CancelFunc, client *smbclie
 	return ch
 }
 
+// sendTreeEvent delivers a scan event unless the consumer has gone away within the timeout.
 func sendTreeEvent(ch chan<- treeEvent, event treeEvent, timeout time.Duration) {
 	timer := time.NewTimer(timeout)
 	defer timer.Stop()
@@ -228,6 +232,7 @@ func sendTreeEvent(ch chan<- treeEvent, event treeEvent, timeout time.Duration) 
 	}
 }
 
+// waitForTreeEvent waits for the next scan batch or reports that the scan stream closed.
 func waitForTreeEvent(ch <-chan treeEvent) tea.Cmd {
 	return func() tea.Msg {
 		event, ok := <-ch
@@ -265,6 +270,7 @@ func (m *treeModel) handleEvent(event treeEvent) bool {
 	return true
 }
 
+// appendItems adds streamed scan items to the model and its filtered table rows.
 func (m *treeModel) appendItems(items []smbclient.WalkItem) {
 	if len(items) == 0 {
 		return
@@ -285,6 +291,7 @@ func (m *treeModel) appendItems(items []smbclient.WalkItem) {
 	m.table.SetRows(m.rows)
 }
 
+// treeRow formats one scan item as a table row.
 func treeRow(item smbclient.WalkItem) table.Row {
 	name := termtext.Clean(item.Path)
 	if item.Dir {
@@ -322,6 +329,7 @@ func (m *treeModel) detach() {
 	}
 }
 
+// drainTreeChannel consumes a scan channel in the background so its producer can exit.
 func drainTreeChannel(ch <-chan treeEvent) {
 	go func() {
 		for range ch {
@@ -329,6 +337,7 @@ func drainTreeChannel(ch <-chan treeEvent) {
 	}()
 }
 
+// selected returns the scan item under the table cursor and whether one exists.
 func (m *treeModel) selected() (smbclient.WalkItem, bool) {
 	cursor := m.table.Cursor()
 	if cursor < 0 || cursor >= len(m.visible) {
@@ -337,6 +346,7 @@ func (m *treeModel) selected() (smbclient.WalkItem, bool) {
 	return m.visible[cursor], true
 }
 
+// selectedError returns the error attached to the selected scan item, if any.
 func (m *treeModel) selectedError() string {
 	item, ok := m.selected()
 	if !ok || item.Err == nil {
@@ -345,6 +355,7 @@ func (m *treeModel) selectedError() string {
 	return item.Err.Error()
 }
 
+// startFilter focuses the filter input while keeping the existing filter text.
 func (m *treeModel) startFilter() tea.Cmd {
 	m.filtering = true
 	m.filter.SetValue(m.filterText)
@@ -354,6 +365,7 @@ func (m *treeModel) startFilter() tea.Cmd {
 	return m.filter.Focus()
 }
 
+// stopFilter leaves filter mode, optionally clearing the filter text.
 func (m *treeModel) stopFilter(clear bool) {
 	m.filtering = false
 	m.filter.Blur()
@@ -364,6 +376,7 @@ func (m *treeModel) stopFilter(clear bool) {
 	m.setSize(m.width, m.height)
 }
 
+// handleFilterKey handles esc and enter and forwards other keys to the filter input.
 func (m *treeModel) handleFilterKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "esc":
@@ -380,6 +393,7 @@ func (m *treeModel) handleFilterKey(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
+// rebuildRows reapplies the filter to all collected scan items.
 func (m *treeModel) rebuildRows() {
 	needle := strings.ToLower(strings.TrimSpace(m.filterText))
 	m.visible = m.visible[:0]
@@ -400,12 +414,14 @@ func (m *treeModel) rebuildRows() {
 	m.setSize(m.width, m.height)
 }
 
+// updateTable forwards navigation keys to the table model.
 func (m *treeModel) updateTable(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	m.table, cmd = m.table.Update(msg)
 	return cmd
 }
 
+// View renders the scan title, statistics, warnings, errors and result table.
 func (m *treeModel) View() string {
 	t := m.theme
 	title := t.appTitle.Render("Recursive scan") + t.muted.Render("  "+m.pathLabel())
@@ -457,6 +473,7 @@ func (m *treeModel) View() string {
 	return strings.Join(parts, "\n")
 }
 
+// pathLabel formats the scanned host, share and root as a UNC path.
 func (m *treeModel) pathLabel() string {
 	base := `\\` + termtext.Clean(m.host) + `\` + termtext.Clean(m.shareName)
 	if m.root != "" {

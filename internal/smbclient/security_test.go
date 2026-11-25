@@ -25,6 +25,7 @@ func sidBytes(subs ...uint32) []byte {
 	return sidBytesWithAuthority(5, subs...)
 }
 
+// aceBytes builds a plain ACE with the given type, flags, mask and trustee SID.
 func aceBytes(aceType, flags byte, mask uint32, trustee []byte) []byte {
 	b := make([]byte, 8+len(trustee))
 	b[0] = aceType
@@ -35,6 +36,7 @@ func aceBytes(aceType, flags byte, mask uint32, trustee []byte) []byte {
 	return b
 }
 
+// objectACEBytes builds an object ACE, including the object flags and GUIDs before its trustee.
 func objectACEBytes(aceType, flags byte, mask uint32, trustee []byte) []byte {
 	b := make([]byte, 8+4+16+16+len(trustee))
 	b[0] = aceType
@@ -47,6 +49,7 @@ func objectACEBytes(aceType, flags byte, mask uint32, trustee []byte) []byte {
 	return b
 }
 
+// aclBytes builds a DACL header followed by the supplied ACEs.
 func aclBytes(aces ...[]byte) []byte {
 	size := 8
 	for _, ace := range aces {
@@ -64,6 +67,7 @@ func aclBytes(aces ...[]byte) []byte {
 	return b
 }
 
+// securityDescriptor assembles a self-relative security descriptor from optional owner, group and DACL parts.
 func securityDescriptor(owner, group, dacl []byte) []byte {
 	const header = 20
 	total := header + len(owner) + len(group) + len(dacl)
@@ -93,6 +97,7 @@ func securityDescriptor(owner, group, dacl []byte) []byte {
 	return b
 }
 
+// TestParseSecurityDescriptor checks owner, group, allow/deny ACEs, masks and inheritance flags.
 func TestParseSecurityDescriptor(t *testing.T) {
 	owner := sidBytes(32, 544)           // BUILTIN\Administrators
 	group := sidBytesWithAuthority(1, 0) // Everyone
@@ -139,6 +144,7 @@ func TestParseSecurityDescriptor(t *testing.T) {
 	}
 }
 
+// TestParseNullDACL verifies that a descriptor without a DACL is reported as a null DACL.
 func TestParseNullDACL(t *testing.T) {
 	sd, err := ParseSecurityDescriptor(securityDescriptor(sidBytesWithAuthority(1, 0), sidBytesWithAuthority(1, 0), nil))
 	if err != nil {
@@ -149,6 +155,7 @@ func TestParseNullDACL(t *testing.T) {
 	}
 }
 
+// TestParseEmptyDACL verifies that an empty but present DACL differs from a null one.
 func TestParseEmptyDACL(t *testing.T) {
 	sd, err := ParseSecurityDescriptor(securityDescriptor(nil, nil, aclBytes()))
 	if err != nil {
@@ -162,6 +169,7 @@ func TestParseEmptyDACL(t *testing.T) {
 	}
 }
 
+// TestParseObjectACE checks that object ACEs locate their trustee after the GUID fields.
 func TestParseObjectACE(t *testing.T) {
 	ace := objectACEBytes(0x05, 0, 0x00000100, sidBytesWithAuthority(1, 0))
 	sd, err := ParseSecurityDescriptor(securityDescriptor(nil, nil, aclBytes(ace)))
@@ -183,6 +191,7 @@ func TestParseObjectACE(t *testing.T) {
 	}
 }
 
+// TestParseMalformedSecurityDescriptorsNeverPanic feeds truncated and corrupted descriptors to ensure errors replace panics.
 func TestParseMalformedSecurityDescriptorsNeverPanic(t *testing.T) {
 	owner := sidBytes(32, 544)
 	dacl := aclBytes(aceBytes(0x00, 0, 0x1F01FF, sidBytes(1, 0)))
@@ -213,6 +222,7 @@ func TestParseMalformedSecurityDescriptorsNeverPanic(t *testing.T) {
 	}
 }
 
+// TestAccessMaskSummary checks named access masks and their decomposition into component rights.
 func TestAccessMaskSummary(t *testing.T) {
 	cases := map[uint32]string{
 		0x00000000: "None",
@@ -236,6 +246,7 @@ func TestAccessMaskSummary(t *testing.T) {
 	}
 }
 
+// TestSIDName checks well-known SID lookup and domain-group RID naming.
 func TestSIDName(t *testing.T) {
 	cases := map[string]string{
 		"S-1-5-32-544":              `BUILTIN\Administrators`,

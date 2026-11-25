@@ -10,6 +10,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
+// dialCmd connects to the server asynchronously, bounding the whole connection attempt by the configured timeout.
 func (a *App) dialCmd(cfg smbclient.Config) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.ConnectTimeout+5*time.Second)
@@ -19,6 +20,7 @@ func (a *App) dialCmd(cfg smbclient.Config) tea.Cmd {
 	}
 }
 
+// onConnected installs a successful session or returns to the login form with the error and a useful field focused.
 func (a *App) onConnected(msg connectedMsg) (tea.Model, tea.Cmd) {
 	a.connect.connecting = false
 	if msg.err != nil {
@@ -54,6 +56,7 @@ func (a *App) onConnected(msg connectedMsg) (tea.Model, tea.Cmd) {
 	return a, a.loadSharesCmd()
 }
 
+// loadSharesCmd asynchronously enumerates shares and probes their effective access.
 func (a *App) loadSharesCmd() tea.Cmd {
 	client := a.client
 	if client == nil {
@@ -76,6 +79,7 @@ func (a *App) loadSharesCmd() tea.Cmd {
 	}
 }
 
+// onSharesLoaded applies a share enumeration, reports connection loss and caches share metadata.
 func (a *App) onSharesLoaded(msg sharesLoadedMsg) (tea.Model, tea.Cmd) {
 	if msg.seq != a.seqShares {
 		return a, nil
@@ -98,6 +102,7 @@ func (a *App) onSharesLoaded(msg sharesLoadedMsg) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// openShareCmd mounts a share and lists its initial directory asynchronously.
 func (a *App) openShareCmd(name, initialPath string) tea.Cmd {
 	client := a.client
 	if client == nil {
@@ -123,6 +128,7 @@ func (a *App) openShareCmd(name, initialPath string) tea.Cmd {
 	}
 }
 
+// onShareOpened enters the browser on success or reports the share-open failure.
 func (a *App) onShareOpened(msg shareOpenedMsg) (tea.Model, tea.Cmd) {
 	if msg.seq != a.seqOpen {
 		if msg.share != nil {

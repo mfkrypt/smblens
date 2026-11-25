@@ -12,6 +12,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/termtext"
 )
 
+// startTransfer opens the transfer dialog and starts the upload or download goroutine.
 func (a *App) startTransfer(direction transferDirection, local, remote string, overwrite bool) tea.Cmd {
 	share := a.share
 	if share == nil {
@@ -35,6 +36,7 @@ func (a *App) startTransfer(direction transferDirection, local, remote string, o
 	return waitForTransferEvent(ch)
 }
 
+// onTransferEvent applies progress, handles overwrite confirmations and reports completion or cancellation.
 func (a *App) onTransferEvent(msg transferEventMsg) (tea.Model, tea.Cmd) {
 	state := a.dialog.transfer
 	if state == nil || a.dialog.kind != dialogTransfer {

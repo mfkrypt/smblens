@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// openHelp opens the full key-binding help for the current screen or dialog.
 func (a *App) openHelp() (tea.Model, tea.Cmd) {
 	h := help.New()
 	h.ShowAll = true
@@ -17,6 +18,7 @@ func (a *App) openHelp() (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// openErrorDialog opens a scrollable technical error dialog and remembers the error for later inspection.
 func (a *App) openErrorDialog(title string, err error) (tea.Model, tea.Cmd) {
 	a.dialog.openError(title, err)
 	a.dialog.setSize(a.width, a.height)
@@ -24,6 +26,7 @@ func (a *App) openErrorDialog(title string, err error) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// currentKeyMap returns the key map matching the active dialog or screen.
 func (a *App) currentKeyMap() help.KeyMap {
 	if a.dialog.active() {
 		return dialogKeys{a.keys}

@@ -82,6 +82,7 @@ func (a *App) handleDialogKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// openMkdirPrompt opens the new-folder prompt for the directory currently shown in the browser.
 func (a *App) openMkdirPrompt() (tea.Model, tea.Cmd) {
 	cmd := a.dialog.openPrompt(
 		"New folder",
@@ -93,6 +94,7 @@ func (a *App) openMkdirPrompt() (tea.Model, tea.Cmd) {
 	return a, cmd
 }
 
+// openRenamePrompt opens the rename prompt with the entry's current name prefilled.
 func (a *App) openRenamePrompt(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	cmd := a.dialog.openPrompt(
 		"Rename",
@@ -104,6 +106,7 @@ func (a *App) openRenamePrompt(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	return a, cmd
 }
 
+// openUploadPrompt asks for a local file to upload into the current directory.
 func (a *App) openUploadPrompt() (tea.Model, tea.Cmd) {
 	cmd := a.dialog.openPrompt(
 		"Upload",
@@ -115,6 +118,7 @@ func (a *App) openUploadPrompt() (tea.Model, tea.Cmd) {
 	return a, cmd
 }
 
+// openDownloadPrompt asks for a local file destination, defaulting to the current directory.
 func (a *App) openDownloadPrompt(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	cmd := a.dialog.openPrompt(
 		"Download",
@@ -126,6 +130,7 @@ func (a *App) openDownloadPrompt(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	return a, cmd
 }
 
+// openFolderDownloadPrompt asks for a local folder and explains that the remote tree will be recreated.
 func (a *App) openFolderDownloadPrompt(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	cmd := a.dialog.openPrompt(
 		"Download folder",
@@ -146,6 +151,7 @@ func (a *App) defaultDownloadPath(name string) string {
 	return smbclient.LocalDownloadPath(cwd, "", name)
 }
 
+// openDeleteConfirm asks for confirmation before deleting a file or an empty folder.
 func (a *App) openDeleteConfirm(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	kind := "file"
 	if entry.Dir {
@@ -160,6 +166,7 @@ func (a *App) openDeleteConfirm(entry smbclient.Entry) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// submitPrompt validates a prompt value, then starts the corresponding file operation or transfer.
 func (a *App) submitPrompt() (tea.Model, tea.Cmd) {
 	value := a.dialog.promptValue()
 	pending := a.dialog.pending
@@ -265,6 +272,7 @@ func (a *App) submitPrompt() (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// confirmPending executes the action stored by a confirmation dialog.
 func (a *App) confirmPending() (tea.Model, tea.Cmd) {
 	pending := a.dialog.pending
 	a.dialog.close()
@@ -305,6 +313,7 @@ func (a *App) runFileOp(desc string, refresh refreshTarget, fn func(context.Cont
 	}
 }
 
+// onOperationDone reports a completed file operation and refreshes the directory when requested.
 func (a *App) onOperationDone(msg operationDoneMsg) (tea.Model, tea.Cmd) {
 	if msg.seq != a.seqOp {
 		return a, nil

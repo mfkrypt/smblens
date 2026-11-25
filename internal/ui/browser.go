@@ -43,6 +43,7 @@ type browserModel struct {
 	theme         *theme
 }
 
+// newBrowserModel builds the directory table, filter input and empty browser state.
 func newBrowserModel(t *theme) browserModel {
 	tbl := table.New(
 		table.WithColumns(browserColumns(80)),
@@ -61,6 +62,7 @@ func newBrowserModel(t *theme) browserModel {
 	return browserModel{table: tbl, filter: filter, theme: t}
 }
 
+// browserColumns lays out the name, size, modification and type columns for the given width.
 func browserColumns(width int) []table.Column {
 	if width < 56 {
 		width = 56
@@ -81,6 +83,7 @@ func browserColumns(width int) []table.Column {
 	}
 }
 
+// setSize resizes the table, columns and filter for the available body area.
 func (m *browserModel) setSize(width, height int) {
 	m.width, m.height = width, height
 	m.table.SetWidth(width)
@@ -101,11 +104,13 @@ func (m *browserModel) setSize(width, height int) {
 	m.table.SetHeight(tableHeight)
 }
 
+// setLoading clears the previous error and marks the listing as in progress.
 func (m *browserModel) setLoading() {
 	m.loading = true
 	m.err = nil
 }
 
+// setData installs a directory listing, clears the loading state and rebuilds the visible rows.
 func (m *browserModel) setData(path string, entries []smbclient.Entry, err error) {
 	m.loading = false
 	m.err = err
@@ -137,6 +142,7 @@ func (m *browserModel) clear() {
 	m.loading = false
 }
 
+// rebuild applies the hidden-file preference, filter and sort order to the entries.
 func (m *browserModel) rebuild() {
 	needle := strings.ToLower(strings.TrimSpace(m.filterText))
 	filtered := make([]smbclient.Entry, 0, len(m.entries))
@@ -198,6 +204,7 @@ func (m *browserModel) rebuild() {
 	}
 }
 
+// selected returns the entry under the table cursor and whether one exists.
 func (m *browserModel) selected() (smbclient.Entry, bool) {
 	cursor := m.table.Cursor()
 	if cursor < 0 || cursor >= len(m.visible) {
@@ -206,6 +213,7 @@ func (m *browserModel) selected() (smbclient.Entry, bool) {
 	return m.visible[cursor], true
 }
 
+// startFilter focuses the filter input and clears any previous filter.
 func (m *browserModel) startFilter() tea.Cmd {
 	m.filtering = true
 	m.filter.SetValue("")
@@ -215,6 +223,7 @@ func (m *browserModel) startFilter() tea.Cmd {
 	return m.filter.Focus()
 }
 
+// stopFilter leaves filter mode, optionally clearing the filter text.
 func (m *browserModel) stopFilter(clear bool) {
 	m.filtering = false
 	m.filter.Blur()
@@ -226,6 +235,7 @@ func (m *browserModel) stopFilter(clear bool) {
 	m.setSize(m.width, m.height)
 }
 
+// handleFilterKey handles esc and enter and forwards other keys to the filter input.
 func (m *browserModel) handleFilterKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "esc":
@@ -242,12 +252,14 @@ func (m *browserModel) handleFilterKey(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
+// updateTable forwards navigation keys to the table model.
 func (m *browserModel) updateTable(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	m.table, cmd = m.table.Update(msg)
 	return cmd
 }
 
+// cycleSort rotates the ordering between name, modified time and size.
 func (m *browserModel) cycleSort() {
 	switch m.sortMode {
 	case browserSortName:
@@ -260,11 +272,13 @@ func (m *browserModel) cycleSort() {
 	m.rebuild()
 }
 
+// toggleHidden shows or hides dotfiles and entries flagged hidden by SMB.
 func (m *browserModel) toggleHidden() {
 	m.showHidden = !m.showHidden
 	m.rebuild()
 }
 
+// sortLabel returns the current sort order for the status line.
 func (m *browserModel) sortLabel() string {
 	switch m.sortMode {
 	case browserSortSize:
@@ -276,6 +290,7 @@ func (m *browserModel) sortLabel() string {
 	}
 }
 
+// View renders the browser title, location, status, errors and file table.
 func (m *browserModel) View() string {
 	t := m.theme
 	title := t.appTitle.Render("Share") + t.muted.Render("  "+m.uncPath())
@@ -311,7 +326,7 @@ func (m *browserModel) View() string {
 	return strings.Join(parts, "\n")
 }
 
-// uncDisplay formats a share name for display.
+// uncPath formats the current host and share as a UNC path for display.
 func (m *browserModel) uncPath() string {
 	if m.shareName == "" {
 		return ""

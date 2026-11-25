@@ -173,6 +173,7 @@ func (c *Client) probeShare(ctx context.Context, info ShareInfo, probeWrite bool
 	return state
 }
 
+// shareKind converts an SMB share type into the model's ShareKind for display and non-disk handling.
 func shareKind(t smb2.ShareType) ShareKind {
 	switch t {
 	case smb2.ShareTypeDiskTree:

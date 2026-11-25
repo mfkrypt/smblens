@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// TestKerberosRejectsIPWithoutSPN verifies that Kerberos needs a DNS name unless --spn is explicit.
 func TestKerberosRejectsIPWithoutSPN(t *testing.T) {
 	cfg := Config{
 		Auth:     AuthKerberos,
@@ -28,6 +29,7 @@ func TestKerberosRejectsIPWithoutSPN(t *testing.T) {
 	}
 }
 
+// TestKerberosSourceInference checks source precedence among password, keytab, ccache and KRB5CCNAME.
 func TestKerberosSourceInference(t *testing.T) {
 	t.Setenv("KRB5CCNAME", "")
 
@@ -56,6 +58,7 @@ func TestKerberosSourceInference(t *testing.T) {
 	}
 }
 
+// TestKerberosRealmResolution checks realm selection and upper-casing from --realm and --domain.
 func TestKerberosRealmResolution(t *testing.T) {
 	cases := []struct {
 		cfg  Config
@@ -73,6 +76,7 @@ func TestKerberosRealmResolution(t *testing.T) {
 	}
 }
 
+// TestKerberosMissingCacheIsFriendly checks the error returned for an unreadable credential cache.
 func TestKerberosMissingCacheIsFriendly(t *testing.T) {
 	cfg := Config{
 		Auth:           AuthKerberos,
@@ -86,6 +90,7 @@ func TestKerberosMissingCacheIsFriendly(t *testing.T) {
 	}
 }
 
+// TestKerberosUnreachableKDCIsBounded verifies that an unreachable KDC fails within the connect timeout and yields friendly advice.
 func TestKerberosUnreachableKDCIsBounded(t *testing.T) {
 	cfg := Config{
 		Host:           "server.example.com",
@@ -118,6 +123,7 @@ func TestKerberosUnreachableKDCIsBounded(t *testing.T) {
 	}
 }
 
+// TestNormalizeKDCAddress checks default port insertion for hostnames, IPv4 and bracketed or bare IPv6.
 func TestNormalizeKDCAddress(t *testing.T) {
 	cases := map[string]string{
 		"":            "",

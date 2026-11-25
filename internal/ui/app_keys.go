@@ -10,6 +10,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
+// handleKey dispatches global shortcuts, then delegates to the handler for the active screen.
 func (a *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if msg.String() == "ctrl+c" {
 		return a.quit()
@@ -49,6 +50,7 @@ func (a *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// isFiltering reports whether the active screen has an inline filter accepting text input.
 func (a *App) isFiltering() bool {
 	switch a.screen {
 	case screenShares:
@@ -61,6 +63,7 @@ func (a *App) isFiltering() bool {
 	return false
 }
 
+// handleSharesKey handles navigation, opening and actions on the share list.
 func (a *App) handleSharesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if a.shares.filtering {
 		return a, a.shares.handleFilterKey(msg)
@@ -123,6 +126,7 @@ func (a *App) handleSharesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return a, a.shares.updateTable(msg)
 }
 
+// handleBrowserKey handles navigation, viewing, transfers and file operations in the browser.
 func (a *App) handleBrowserKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if a.browser.filtering {
 		return a, a.browser.handleFilterKey(msg)
@@ -233,6 +237,7 @@ func (a *App) handleBrowserKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return a, a.browser.updateTable(msg)
 }
 
+// handleTreeKey handles scan cancellation, export and filtering on the recursive scan screen.
 func (a *App) handleTreeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if a.tree.filtering {
 		return a, a.tree.handleFilterKey(msg)
@@ -254,6 +259,7 @@ func (a *App) handleTreeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return a, a.tree.updateTable(msg)
 }
 
+// handleViewerKey closes the viewer or forwards scrolling to it.
 func (a *App) handleViewerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "q", "esc":

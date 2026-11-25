@@ -45,6 +45,7 @@ type keyBindings struct {
 	scroll  key.Binding
 }
 
+// defaultKeys defines every shortcut once so the footer help and full help screen stay in sync.
 func defaultKeys() keyBindings {
 	return keyBindings{
 		up:     key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/k", "up")),
@@ -92,10 +93,12 @@ func defaultKeys() keyBindings {
 
 type sharesKeys struct{ k keyBindings }
 
+// ShortHelp lists the share-list shortcuts shown in the footer.
 func (s sharesKeys) ShortHelp() []key.Binding {
 	return []key.Binding{s.k.open, s.k.perms, s.k.tree, s.k.filter, s.k.disconnect, s.k.help, s.k.quit}
 }
 
+// FullHelp groups all share-list shortcuts for the full help dialog.
 func (s sharesKeys) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{s.k.up, s.k.down, s.k.pgUp, s.k.pgDown, s.k.top, s.k.bottom},
@@ -106,10 +109,12 @@ func (s sharesKeys) FullHelp() [][]key.Binding {
 
 type browserKeys struct{ k keyBindings }
 
+// ShortHelp lists the browser shortcuts shown in the footer.
 func (b browserKeys) ShortHelp() []key.Binding {
 	return []key.Binding{b.k.open, b.k.view, b.k.download, b.k.upload, b.k.delete, b.k.tree, b.k.back, b.k.help}
 }
 
+// FullHelp groups all browser shortcuts for the full help dialog.
 func (b browserKeys) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{b.k.up, b.k.down, b.k.pgUp, b.k.pgDown, b.k.top, b.k.bottom},
@@ -121,10 +126,12 @@ func (b browserKeys) FullHelp() [][]key.Binding {
 
 type treeKeys struct{ k keyBindings }
 
+// ShortHelp lists the recursive-scan shortcuts shown in the footer.
 func (t treeKeys) ShortHelp() []key.Binding {
 	return []key.Binding{t.k.up, t.k.down, t.k.scroll, t.k.filter, t.k.export, t.k.cancelScan, t.k.back, t.k.help}
 }
 
+// FullHelp groups all recursive-scan shortcuts for the full help dialog.
 func (t treeKeys) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{t.k.up, t.k.down, t.k.pgUp, t.k.pgDown, t.k.top, t.k.bottom},
@@ -134,10 +141,12 @@ func (t treeKeys) FullHelp() [][]key.Binding {
 
 type viewerKeys struct{ k keyBindings }
 
+// ShortHelp lists the viewer shortcuts shown in the footer.
 func (v viewerKeys) ShortHelp() []key.Binding {
 	return []key.Binding{v.k.up, v.k.down, v.k.pgUp, v.k.pgDown, v.k.top, v.k.bottom, v.k.back, v.k.help}
 }
 
+// FullHelp groups all viewer shortcuts for the full help dialog.
 func (v viewerKeys) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{v.k.up, v.k.down, v.k.pgUp, v.k.pgDown, v.k.top, v.k.bottom},
@@ -147,10 +156,12 @@ func (v viewerKeys) FullHelp() [][]key.Binding {
 
 type connectKeys struct{ k keyBindings }
 
+// ShortHelp lists the login shortcuts shown in the footer.
 func (c connectKeys) ShortHelp() []key.Binding {
 	return []key.Binding{c.k.nextField, c.k.prevField, c.k.choose, c.k.connect, c.k.quitConnect}
 }
 
+// FullHelp groups all login shortcuts for the full help dialog.
 func (c connectKeys) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{c.k.nextField, c.k.prevField, c.k.choose, c.k.connect},
@@ -160,10 +171,12 @@ func (c connectKeys) FullHelp() [][]key.Binding {
 
 type dialogKeys struct{ k keyBindings }
 
+// ShortHelp lists the dialog shortcuts shown in the footer.
 func (d dialogKeys) ShortHelp() []key.Binding {
 	return []key.Binding{d.k.scroll, d.k.confirm, d.k.cancel}
 }
 
+// FullHelp groups all dialog shortcuts for the full help dialog.
 func (d dialogKeys) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{d.k.scroll, d.k.confirm, d.k.cancel, d.k.details},

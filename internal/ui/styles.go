@@ -53,6 +53,7 @@ type theme struct {
 	filter      lipgloss.Style
 }
 
+// newTheme builds the adaptive colour styles used by every screen.
 func newTheme() *theme {
 	return &theme{
 		appTitle:    lipgloss.NewStyle().Bold(true).Foreground(colors.accent),

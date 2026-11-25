@@ -2,6 +2,7 @@ package termtext
 
 import "testing"
 
+// TestCleanStripsEscapesAndControls checks that labels lose terminal escapes, control characters and invisible spoofing characters.
 func TestCleanStripsEscapesAndControls(t *testing.T) {
 	cases := []struct {
 		in, want string
@@ -27,6 +28,7 @@ func TestCleanStripsEscapesAndControls(t *testing.T) {
 	}
 }
 
+// TestCleanMultilineKeepsLayout verifies that file content keeps line breaks and tab spacing while unsafe characters are removed.
 func TestCleanMultilineKeepsLayout(t *testing.T) {
 	cases := []struct {
 		in, want string
@@ -47,6 +49,7 @@ func TestCleanMultilineKeepsLayout(t *testing.T) {
 	}
 }
 
+// TestCleanUnterminatedEscape checks that an unterminated escape sequence cannot leak its payload.
 func TestCleanUnterminatedEscape(t *testing.T) {
 	// An escape sequence that never terminates must not leak its payload.
 	if got := Clean("visible\x1b[31"); got != "visible" {

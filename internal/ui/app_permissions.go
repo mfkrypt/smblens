@@ -9,6 +9,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
+// openPermissionsFromShares mounts a share and reads its root security descriptor asynchronously.
 func (a *App) openPermissionsFromShares(share smbclient.ShareInfo) tea.Cmd {
 	client := a.client
 	if client == nil {
@@ -40,6 +41,7 @@ func (a *App) openPermissionsFromShares(share smbclient.ShareInfo) tea.Cmd {
 	}
 }
 
+// openPermissionsForPath reads the security descriptor of the selected path asynchronously.
 func (a *App) openPermissionsForPath(path string) tea.Cmd {
 	share := a.share
 	if share == nil || path == "" {
@@ -73,6 +75,7 @@ func (a *App) openPermissionsForPath(path string) tea.Cmd {
 	}
 }
 
+// onPermissionsLoaded fills the permissions dialog with the report or a readable failure explanation.
 func (a *App) onPermissionsLoaded(msg permissionsLoadedMsg) (tea.Model, tea.Cmd) {
 	if msg.seq != a.seqPerms || a.dialog.kind != dialogPermissions {
 		return a, nil

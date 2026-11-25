@@ -9,12 +9,14 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
+// quit closes all SMB state and stops the Bubble Tea program.
 func (a *App) quit() (tea.Model, tea.Cmd) {
 	a.quitting = true
 	a.Close()
 	return a, tea.Quit
 }
 
+// disconnect tears down the current session and returns to the login form.
 func (a *App) disconnect() (tea.Model, tea.Cmd) {
 	a.closeSession()
 	a.screen = screenConnect
@@ -23,6 +25,7 @@ func (a *App) disconnect() (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// leaveBrowser closes the mounted share and returns to the share list, reloading it when necessary.
 func (a *App) leaveBrowser() (tea.Model, tea.Cmd) {
 	a.stopDirLoad()
 	if a.share != nil {
@@ -38,6 +41,7 @@ func (a *App) leaveBrowser() (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// leaveTree stops the scan and returns to the browser or share list it was started from.
 func (a *App) leaveTree() (tea.Model, tea.Cmd) {
 	a.tree.detach()
 	if a.treeBack == screenBrowser && a.share != nil {
@@ -79,6 +83,7 @@ func (a *App) closeSession() {
 	a.seqOp++
 }
 
+// cancelAll cancels every outstanding operation and transfer without closing the session itself.
 func (a *App) cancelAll() {
 	for _, cancel := range []context.CancelFunc{
 		a.cancelShares, a.cancelOpen, a.cancelDir, a.cancelFile, a.cancelPerms, a.cancelOp,

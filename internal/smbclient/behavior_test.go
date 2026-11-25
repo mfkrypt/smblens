@@ -14,6 +14,7 @@ type fakeFS struct {
 	errors map[string]error
 }
 
+// List returns the fake directory entries or the error configured for that directory.
 func (f *fakeFS) List(_ context.Context, dir string) ([]Entry, error) {
 	if err, ok := f.errors[dir]; ok {
 		return nil, err
@@ -25,10 +26,12 @@ func (f *fakeFS) List(_ context.Context, dir string) ([]Entry, error) {
 	return entries, nil
 }
 
+// entry constructs a minimal Entry for a Walk fixture.
 func entry(name string, dir bool, size int64) Entry {
 	return Entry{Name: name, Path: name, Dir: dir, Size: size}
 }
 
+// TestWalkTraversesDepthFirst checks directory-first traversal order and cumulative statistics.
 func TestWalkTraversesDepthFirst(t *testing.T) {
 	fs := &fakeFS{dirs: map[string][]Entry{
 		"": {
@@ -73,6 +76,7 @@ func TestWalkTraversesDepthFirst(t *testing.T) {
 	}
 }
 
+// TestWalkHonoursMaxDepth checks the depth limit and that SkipDirs omits directories from the output.
 func TestWalkHonoursMaxDepth(t *testing.T) {
 	fs := &fakeFS{dirs: map[string][]Entry{
 		"":    {{Name: "a", Path: "a", Dir: true}},
@@ -103,6 +107,7 @@ func TestWalkHonoursMaxDepth(t *testing.T) {
 	}
 }
 
+// TestWalkReportsDirectoryErrorsAndContinues checks that one unreadable subtree is reported while healthy branches continue.
 func TestWalkReportsDirectoryErrorsAndContinues(t *testing.T) {
 	fs := &fakeFS{
 		dirs: map[string][]Entry{
@@ -141,6 +146,7 @@ func TestWalkReportsDirectoryErrorsAndContinues(t *testing.T) {
 	}
 }
 
+// TestWalkRootErrorIsFatal checks that failing to list the root aborts the walk.
 func TestWalkRootErrorIsFatal(t *testing.T) {
 	fs := &fakeFS{dirs: map[string][]Entry{}, errors: map[string]error{"": os.ErrPermission}}
 	if err := Walk(context.Background(), fs, "", WalkOptions{}, func(WalkItem) {}); err == nil {
@@ -148,6 +154,7 @@ func TestWalkRootErrorIsFatal(t *testing.T) {
 	}
 }
 
+// TestWalkCancellation checks that a cancelled context stops the walk with context.Canceled.
 func TestWalkCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -157,6 +164,7 @@ func TestWalkCancellation(t *testing.T) {
 	}
 }
 
+// TestWalkRejectsParentTraversal checks that a root containing parent traversal is rejected.
 func TestWalkRejectsParentTraversal(t *testing.T) {
 	fs := &fakeFS{dirs: map[string][]Entry{}}
 	if err := Walk(context.Background(), fs, "../etc", WalkOptions{}, func(WalkItem) {}); err == nil {
@@ -164,6 +172,7 @@ func TestWalkRejectsParentTraversal(t *testing.T) {
 	}
 }
 
+// TestCleanRemotePath checks path normalisation and rejection of traversal and NUL bytes.
 func TestCleanRemotePath(t *testing.T) {
 	valid := map[string]string{
 		"":             "",
@@ -192,6 +201,7 @@ func TestCleanRemotePath(t *testing.T) {
 	}
 }
 
+// TestSafeEntryName checks which server-provided names can be safely joined into a path.
 func TestSafeEntryName(t *testing.T) {
 	for _, name := range []string{"", ".", "..", "a/b", `a\b`, "a\x00b"} {
 		if _, ok := safeEntryName(name); ok {
@@ -205,12 +215,14 @@ func TestSafeEntryName(t *testing.T) {
 	}
 }
 
+// TestLocalDownloadPathWithoutShareComponent checks the destination when no share component is requested.
 func TestLocalDownloadPathWithoutShareComponent(t *testing.T) {
 	if got := LocalDownloadPath("/tmp/downloads", "", "file.txt"); got != "/tmp/downloads/file.txt" {
 		t.Fatalf("LocalDownloadPath = %q", got)
 	}
 }
 
+// TestLocalTreePath checks tree path mapping and control-character sanitisation.
 func TestLocalTreePath(t *testing.T) {
 	root := "/tmp/downloads"
 	cases := map[string]string{
@@ -233,6 +245,7 @@ func TestLocalTreePath(t *testing.T) {
 	}
 }
 
+// TestLocalDownloadPathCannotEscape checks that traversal components cannot leave the base directory.
 func TestLocalDownloadPathCannotEscape(t *testing.T) {
 	base := "/tmp/downloads"
 	got := LocalDownloadPath(base, "../../etc", "../../../passwd")
@@ -241,6 +254,7 @@ func TestLocalDownloadPathCannotEscape(t *testing.T) {
 	}
 }
 
+// TestLocalDownloadPathSanitisesControlCharacters checks that escape and bell characters are replaced in local paths.
 func TestLocalDownloadPathSanitisesControlCharacters(t *testing.T) {
 	got := LocalDownloadPath("/tmp/downloads", "share\x1b]0;pwned\x07", "dir\x1b[31mred/file.txt")
 	if strings.ContainsRune(got, 0x1b) || strings.ContainsRune(got, 0x07) {
@@ -251,6 +265,7 @@ func TestLocalDownloadPathSanitisesControlCharacters(t *testing.T) {
 	}
 }
 
+// TestLooksBinary checks the NUL-byte heuristic used to identify binary files.
 func TestLooksBinary(t *testing.T) {
 	if looksBinary([]byte("plain text\n")) {
 		t.Fatal("plain text detected as binary")
@@ -260,6 +275,7 @@ func TestLooksBinary(t *testing.T) {
 	}
 }
 
+// TestAccessLabel checks the compact labels shown for each share-probe outcome.
 func TestAccessLabel(t *testing.T) {
 	cases := []struct {
 		state AccessState
@@ -280,6 +296,7 @@ func TestAccessLabel(t *testing.T) {
 	}
 }
 
+// TestWhitespaceInNamesIsPreserved checks that leading and trailing spaces in remote names survive path handling.
 func TestWhitespaceInNamesIsPreserved(t *testing.T) {
 	if got := JoinPath("dir", " report 2024.txt "); got != "dir/ report 2024.txt " {
 		t.Fatalf("JoinPath = %q", got)
@@ -289,6 +306,7 @@ func TestWhitespaceInNamesIsPreserved(t *testing.T) {
 	}
 }
 
+// TestJoinAndParentPath checks path joining and parent calculation at the share root.
 func TestJoinAndParentPath(t *testing.T) {
 	if got := JoinPath("a", "b", "c"); got != "a/b/c" {
 		t.Fatalf("JoinPath = %q", got)

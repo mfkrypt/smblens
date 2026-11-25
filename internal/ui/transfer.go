@@ -78,6 +78,7 @@ type transferState struct {
 	theme  *theme
 }
 
+// newTransferState builds the dialog state for an upload, file download or recursive folder download.
 func newTransferState(direction transferDirection, host, shareName, remote, local string, cancel context.CancelFunc, ch <-chan transferEvent, t *theme) *transferState {
 	now := time.Now()
 	state := &transferState{
@@ -184,6 +185,7 @@ func runTransfer(ctx context.Context, cancel context.CancelFunc, direction trans
 	return ch
 }
 
+// waitForTransferEvent waits for the next progress event or reports that the channel closed.
 func waitForTransferEvent(ch <-chan transferEvent) tea.Cmd {
 	return func() tea.Msg {
 		event, ok := <-ch
@@ -194,6 +196,7 @@ func waitForTransferEvent(ch <-chan transferEvent) tea.Cmd {
 	}
 }
 
+// update merges one progress event into the transfer state and smooths the transfer rate.
 func (t *transferState) update(event transferEvent) {
 	if event.phase != "" {
 		t.phase = event.phase
@@ -260,6 +263,7 @@ func (t *transferState) update(event transferEvent) {
 	}
 }
 
+// cancelTransfer requests cancellation of an unfinished transfer.
 func (t *transferState) cancelTransfer() {
 	if t.finished || t.cancel == nil {
 		return
@@ -268,6 +272,7 @@ func (t *transferState) cancelTransfer() {
 	t.cancel()
 }
 
+// title returns the dialog title appropriate to the transfer direction.
 func (t *transferState) title() string {
 	switch t.direction {
 	case transferUpload:
@@ -306,6 +311,7 @@ func (t *transferState) View(width int) string {
 	return t.fileView(width)
 }
 
+// fileView renders a single-file upload or download, including progress, rate and errors.
 func (t *transferState) fileView(width int) string {
 	p := t.theme
 	verb := "Downloading"
@@ -357,6 +363,7 @@ func (t *transferState) fileView(width int) string {
 	return b.String()
 }
 
+// treeView renders a recursive folder download through its scanning, downloading and summary phases.
 func (t *transferState) treeView(width int) string {
 	p := t.theme
 	remote := `\\` + t.host + `\` + t.shareName + `\` + strings.ReplaceAll(t.remote, "/", `\`)
@@ -467,6 +474,7 @@ func (t *transferState) bar(width int, ratio float64) string {
 		t.theme.faint.Render(strings.Repeat("░", barWidth-filled))
 }
 
+// sizeLine formats the transferred and total byte counts.
 func (t *transferState) sizeLine() string {
 	size := formatSize(t.done)
 	if t.total > 0 {
@@ -475,6 +483,7 @@ func (t *transferState) sizeLine() string {
 	return size
 }
 
+// rateSuffix formats the current transfer rate and, when known, an estimated time remaining.
 func (t *transferState) rateSuffix() string {
 	if t.rate <= 0 {
 		return ""
@@ -489,6 +498,7 @@ func (t *transferState) rateSuffix() string {
 	return suffix
 }
 
+// formatDuration renders a number of seconds compactly as seconds or minutes and seconds.
 func formatDuration(seconds float64) string {
 	d := time.Duration(seconds * float64(time.Second))
 	if d < time.Second {

@@ -2,6 +2,7 @@ package version
 
 import "testing"
 
+// TestInfoString checks the formatting of version, commit, date and dirty metadata.
 func TestInfoString(t *testing.T) {
 	cases := []struct {
 		info Info
@@ -27,6 +28,7 @@ func TestInfoString(t *testing.T) {
 	}
 }
 
+// TestGetPrefersInjectedVersion verifies that -X build values take precedence over metadata.
 func TestGetPrefersInjectedVersion(t *testing.T) {
 	oldVersion, oldCommit, oldDate := Version, Commit, Date
 	defer func() { Version, Commit, Date = oldVersion, oldCommit, oldDate }()
@@ -44,6 +46,7 @@ func TestGetPrefersInjectedVersion(t *testing.T) {
 	}
 }
 
+// TestGetAlwaysHasVersion checks that Get never returns an empty version string.
 func TestGetAlwaysHasVersion(t *testing.T) {
 	oldVersion := Version
 	defer func() { Version = oldVersion }()

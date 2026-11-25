@@ -9,6 +9,7 @@ import (
 	"github.com/mfkrypt/smblens/internal/smbclient"
 )
 
+// loadDirCmd asynchronously lists a directory and invalidates any earlier listing.
 func (a *App) loadDirCmd(path string) tea.Cmd {
 	share := a.share
 	if share == nil {
@@ -30,6 +31,7 @@ func (a *App) loadDirCmd(path string) tea.Cmd {
 	}
 }
 
+// onEntriesLoaded applies a directory listing, ignoring stale responses and handling connection loss.
 func (a *App) onEntriesLoaded(msg entriesLoadedMsg) (tea.Model, tea.Cmd) {
 	if msg.seq != a.seqDir {
 		return a, nil
@@ -48,6 +50,7 @@ func (a *App) onEntriesLoaded(msg entriesLoadedMsg) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// openViewerCmd opens the viewer and asynchronously reads the selected file.
 func (a *App) openViewerCmd(entry smbclient.Entry) tea.Cmd {
 	share := a.share
 	if share == nil {
@@ -71,6 +74,7 @@ func (a *App) openViewerCmd(entry smbclient.Entry) tea.Cmd {
 	}
 }
 
+// onFileLoaded applies a file read result to the viewer, ignoring stale responses.
 func (a *App) onFileLoaded(msg fileLoadedMsg) (tea.Model, tea.Cmd) {
 	if msg.seq != a.seqFile {
 		return a, nil
@@ -86,6 +90,7 @@ func (a *App) onFileLoaded(msg fileLoadedMsg) (tea.Model, tea.Cmd) {
 	return a, nil
 }
 
+// stopFileLoad cancels an in-flight file read.
 func (a *App) stopFileLoad() {
 	if a.cancelFile != nil {
 		a.cancelFile()
@@ -93,6 +98,7 @@ func (a *App) stopFileLoad() {
 	}
 }
 
+// stopDirLoad cancels an in-flight directory listing.
 func (a *App) stopDirLoad() {
 	if a.cancelDir != nil {
 		a.cancelDir()
@@ -100,6 +106,7 @@ func (a *App) stopDirLoad() {
 	}
 }
 
+// stopPermsLoad cancels an in-flight permission lookup.
 func (a *App) stopPermsLoad() {
 	if a.cancelPerms != nil {
 		a.cancelPerms()

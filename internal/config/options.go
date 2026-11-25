@@ -206,6 +206,7 @@ func resolveAuth(explicit string, cfg *smbclient.Config) (smbclient.AuthMethod, 
 	}
 }
 
+// validate checks option values that the flag package cannot express, such as port ranges, timeouts and credential syntax.
 func validate(opts *Options, port int) error {
 	cfg := &opts.Config
 	if port < 0 || port > 65535 {
@@ -278,6 +279,7 @@ func ParseTarget(raw string) (host string, port int, share, initialPath string, 
 	return host, port, share, initialPath, nil
 }
 
+// splitHostPort separates a host from an optional port, supporting bracketed and bare IPv6 literals.
 func splitHostPort(s string) (string, int, error) {
 	if s == "" {
 		return "", 0, nil
