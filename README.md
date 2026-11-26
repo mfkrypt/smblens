@@ -4,7 +4,11 @@ SMBLens is an interactive terminal SMB client for Active Directory share enumera
 
 ![readme](./assets/readme.png)
 
+## Legal disclaimer
 
+SMBLens is intended only for authorized security testing, system administration, and research on systems you own or have explicit written permission to test. Using it to access, enumerate, modify, or download data from systems without authorization may be a criminal offence, including under the Computer Misuse Act 1990 (UK), the Computer Crimes Act 1997 (Malaysia), the Computer Fraud and Abuse Act (US), and equivalent laws in other jurisdictions. Credentials (passwords, NT hashes, ccache or keytab files) must only be used against accounts and systems you are authorized to test.
+
+You are solely responsible for confirming that you have permission, staying within the agreed scope, and complying with all applicable laws. The authors and contributors accept no liability for misuse, damage, or legal consequences arising from use of this software. This notice is not legal advice.
 
 ## Installation
 
@@ -136,11 +140,11 @@ internal/ui/                Bubble Tea application
 ```
 
 
+## License
+
+SMBLens is released under the MIT License. See [LICENSE](LICENSE).
+
+
 ## TODO:
 
-
-1. Add video(gif) in readme (Add files in shares first for demo)
-2. Test Kerberos auth with ccache tickets
-3. Test NTLM auth
-4. Re-Test permission display for specific Share read access
-5. Review code for better understanding
+1. Test Kerberos auth with ccache tickets
